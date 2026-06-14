@@ -1,0 +1,11 @@
+export const REGEX_EMAIL = /^(?!.*\.\.)[a-zA-Z0-9][a-zA-Z0-9._%+-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+export const REGEX_PHONE_NO = /^\d*$/;
+export const REGEX_WEBSITE = /^((https?|ftp|smtp):\/\/)?(www.)?[a-z0-9]+\.[a-z]+(\/[a-zA-Z0-9#]+\/?)*$/;
+export const AADHAR_CARD_REGEX = /^[2-9]\d{11}$/;
+export const PAN_CARD_REGEX = /^[A-Z]{5}\d{4}[A-Z]$/;
+export const IFSC_CODE_REGEX = /^[A-Z]{4}0[A-Z0-9]{6}$/;
+export const AMOUNT_REGEX = /^\d+(\.\d{1,2})?$/;
+export const DATE_REGEX = /^\d{4}-(0\d|1[0-2])-(0[1-9]|[1-2]\d|3[0-1])$/;
+export const TIME_REGEX = /^([0-1]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
+export const PINCODE_REGEX = /^(\d{6})$/;
+export const GST_NO_REGEX = /^\d{2}[A-Z]{5}\d{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/;
