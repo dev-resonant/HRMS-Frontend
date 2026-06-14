@@ -1,0 +1,52 @@
+.signup-page {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100dvh;
+
+  .signup-container {
+    min-width: 400px;
+
+    .signup-form {
+      gap: 1rem;
+      display: flex;
+      flex-direction: column;
+
+      .field-container {
+        display: flex;
+        flex-direction: column;
+
+        .field-error {
+          color: #dc2626;
+          margin: 0.5rem 0 0 0;
+          font-size: 0.875rem;
+        }
+      }
+    }
+
+    .social-signup-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1rem;
+
+      .social-signup-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+    }
+  }
+
+  @media (max-width: 600px) {
+    .signup-container {
+      width: 90%;
+      min-width: unset;
+
+      .signup-form {
+        gap: 1rem;
+      }
+    }
+  }
+}
+

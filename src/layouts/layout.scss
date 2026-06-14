@@ -1,0 +1,35 @@
+.layout {
+  height: 100dvh;
+  width: 100dvw;
+  display: grid;
+  overflow: hidden;
+  grid-template-columns: 60px 1fr;
+  grid-template-rows: 60px 1fr auto;
+  transition: grid-template-columns 0.3s ease;
+  grid-template-areas:
+    "sidebar header"
+    "sidebar main"
+    "sidebar footer";
+}
+
+header {
+  grid-area: header;
+  border-bottom: 1px solid #d1d5db;
+  padding: 1rem;
+}
+
+.layout:has(aside .drawer-open) {
+  grid-template-columns: 200px 1fr;
+}
+
+main {
+  grid-area: main;
+  overflow-y: auto;
+  background: #f8fafc;
+}
+
+footer {
+  grid-area: footer;
+  border-top: 1px solid #d1d5db;
+  padding: 1rem;
+}

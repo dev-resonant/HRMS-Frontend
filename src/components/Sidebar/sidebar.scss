@@ -1,0 +1,29 @@
+.drawer {
+  .MuiPaper-root {
+    overflow: visible;
+    transition: width 0.3s ease;
+
+    .icon-drawer-toggle {
+      position: absolute;
+      right: -0.9375rem;
+      top: 1rem;
+      width: 1.25rem;
+      height: 1.25rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #ffffff;
+      border: 1px solid #d1d5db;
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: 0.3s ease;
+
+      &:hover {
+        background-color: #f3f4f6;
+      }
+    }
+    .sidebar-main {
+      height: 100%;
+    }
+  }
+}
