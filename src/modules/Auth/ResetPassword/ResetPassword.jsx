@@ -2,18 +2,15 @@ import { useForm } from "react-hook-form";
 import { useResetPassword } from "./reset-password-api";
 import { useSearchParams } from "react-router";
 import "./reset-password.scss";
-import { Visibility, VisibilityOff } from "@mui/icons-material";
+import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import {
   Button,
   TextField,
-  Card,
-  CardContent,
-  CardHeader,
-  CardActions,
   IconButton,
   InputAdornment,
   Typography,
+  Box,
 } from "@mui/material";
 
 const defaultInput = {
@@ -49,9 +46,11 @@ export function ResetPassword() {
 
   return (
     <div className="reset-password-page gradient-bg">
-      <Card className="reset-password-container" elevation={3}>
-        <CardHeader title="Reset Password" />
-        <CardContent>
+      <div className="reset-password-container">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Reset Password
+        </Typography>
+        <div className="reset-password-content">
           <img src="/images/norquest_newlogo.png" alt="" />
           <form noValidate onSubmit={handleSubmit(submit)} className="reset-password-form">
             <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
@@ -86,7 +85,7 @@ export function ResetPassword() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton onClick={() => setShowPassword((p) => !p)} edge="end">
-                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                        {showPassword ? <EyeOff /> : <Eye />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -120,7 +119,7 @@ export function ResetPassword() {
                   endAdornment: (
                     <InputAdornment position="end">
                       <IconButton onClick={() => setShowConfirmPassword((p) => !p)} edge="end">
-                        {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                        {showConfirmPassword ? <EyeOff /> : <Eye />}
                       </IconButton>
                     </InputAdornment>
                   ),
@@ -133,14 +132,14 @@ export function ResetPassword() {
                 {errors.root.serverError.message}
               </Typography>
             )}
-          </form>
-        </CardContent>
-        <CardActions sx={{ justifyContent: "flex-end", p: 2 }}>
+            </form>
+        </div>
+        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
           <Button variant="contained" onClick={handleSubmit(submit)}>
             Continue
           </Button>
-        </CardActions>
-      </Card>
+        </Box>
+      </div>
     </div>
   );
 }

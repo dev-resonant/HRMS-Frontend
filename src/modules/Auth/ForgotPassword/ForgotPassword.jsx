@@ -3,15 +3,10 @@ import { Link, useLocation } from "react-router";
 import { Controller, useForm } from "react-hook-form";
 import { REGEX_EMAIL } from "../../../lib/validation-regex";
 import { useForgotPassword } from "./forgot-password-api";
-import ArrowLeftIcon from "@mui/icons-material/ArrowLeft";
-import LoginIcon from "@mui/icons-material/Login";
+import { ArrowLeft, LogIn } from "lucide-react";
 import "./forgot-password.scss";
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardActions,
   TextField,
   Typography,
   Box,
@@ -49,9 +44,11 @@ export function ForgotPassword({ defaultValues = defaultInput }) {
 
   return (
     <div className="forgot-password-page gradient-bg">
-      <Card className="forgot-password-container" elevation={3}>
-        <CardHeader title="Forgot Password" />
-        <CardContent>
+      <div className="forgot-password-container">
+        <Typography variant="h4" component="h1" gutterBottom>
+          Forgot Password
+        </Typography>
+        <div className="forgot-password-content">
           {isSent ? (
             <Box>
               <Typography variant="body1" sx={{ mb: 2 }}>
@@ -60,7 +57,7 @@ export function ForgotPassword({ defaultValues = defaultInput }) {
                 The Link will expire in 24 Hr.
               </Typography>
               <Link to="/Login" className="login-link">
-                <LoginIcon color="primary" sx={{ fontSize: "16px", color: "#1c57e4" }} /> Click Here to Login
+                <LogIn color="primary" size={16} /> Click Here to Login
               </Link>
             </Box>
           ) : (
@@ -100,21 +97,21 @@ export function ForgotPassword({ defaultValues = defaultInput }) {
               </form>
             </>
           )}
-        </CardContent>
-        <CardActions sx={{ flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
+        </div>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
           {!isSent && (
             <>
               <Button variant="contained" onClick={handleSubmit(submit)} fullWidth>
                 Send Reset Link
               </Button>
               <Link to={{ pathname: "/login" }} className="login-link" style={{ textAlign: "center" }}>
-                <ArrowLeftIcon sx={{ color: "#1c57e4" }} />
+                <ArrowLeft color="#1c57e4" size={16} />
                 Back to Login
               </Link>
             </>
           )}
-        </CardActions>
-      </Card>
+        </Box>
+      </div>
     </div>
   );
 }

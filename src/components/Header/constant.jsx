@@ -2,26 +2,32 @@
 export const userMenuOptions = [
   {
     id: "profile",
-    label: "Name",
+    label: "My Profile",
     icon: "User",
     action: "profile",
   },
   {
-    id: "divider-1",
-    divider: true, // For showing a divider
+    id: "information",
+    label: "Account Info",
+    icon: "Information",
+    action: "account-info",
   },
-  // {
-  //   id: "language",
-  //   label: "Language",
-  //   icon: "Wikis",
-  //   type: "select",
-  //   options: [
-  //     { label: "English", value: "en" },
-  //     { label: "Hindi", value: "hi" },
-  //   ],
-  // },
   {
-    id: "Logout",
+    id: "divider-1",
+    divider: true,
+  },
+  {
+    id: "theme",
+    label: "Dark Mode",
+    icon: "Asleep",
+    action: "theme",
+  },
+  {
+    id: "divider-2",
+    divider: true,
+  },
+  {
+    id: "logout",
     label: "Logout",
     icon: "Logout",
     action: "Logout",

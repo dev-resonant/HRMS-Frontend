@@ -15,13 +15,13 @@ export function Login() {
   return (
     <div className="login-page gradient-bg">
       <GlobalMultiLogin
-        mode={LOGIN_TYPES.usernamePassword}
-        onLogin={(data) => login.mutate(removeEmptyKeys(data))}
+        mode={LOGIN_TYPES.emailPassword}
+        onLogin={(data, remember) => login.mutate({ formdata: removeEmptyKeys(data), remember })}
         sendOtp={(data) => sendOtp.mutate(removeEmptyKeys(data))}
-        verifyOtp={(data) => verifyOtp.mutate(removeEmptyKeys(data))}
-        social_login_options={["google", "apple", "microsoft", "email"]}
+        verifyOtp={(data, remember) => verifyOtp.mutate({ formdata: removeEmptyKeys(data), remember })}
+        // social_login_options={["google", "apple", "microsoft", "email"]}
         isLoading={isLoading}
-        onGoogleLogin={() => console.debug("logged in by google")}
+        // onGoogleLogin={() => console.debug("logged in by google")}
       />
     </div>
   );

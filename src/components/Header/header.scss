@@ -1,6 +1,66 @@
 .custom-header {
-  display: flex;
-  justify-content: end;
-  align-items: center;
-  gap: 1rem;
+  .MuiToolbar-root {
+    gap: 2rem;
+  }
+
+  .header-search {
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    transition: all 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+      background-color: #efefef;
+    }
+
+    &:focus-within {
+      box-shadow: 0 2px 8px rgba(63, 75, 141, 0.2);
+      outline: none;
+    }
+
+    input {
+      transition: all 0.2s ease;
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+
+  .MuiIconButton-root {
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  .MuiBadge-badge {
+    background-color: #f44336;
+    color: #fff;
+  }
 }
+
+// Menu styling
+.MuiMenu-paper {
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+
+  .MuiMenuItem-root {
+    transition: all 0.15s ease;
+    border-radius: 4px;
+    margin: 0 8px;
+
+    &:hover {
+      background-color: #f5f5f5;
+    }
+
+    &:active {
+      background-color: #efefef;
+    }
+  }
+}
+

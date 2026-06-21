@@ -2,70 +2,74 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100dvh;
+  min-height: 100dvh;
+  padding: 2rem;
 
   .login-container {
-    min-width: 400px;
+    width: min(480px, 100%);
+    padding: 3rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+
+    .login-header {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .logo-circle {
+      width: 54px;
+      height: 54px;
+      border-radius: 0.8rem;
+      display: grid;
+      place-items: center;
+      background: #251B72;
+      color: #ffffff;
+      box-shadow: 0 18px 36px rgba(50, 32, 181, 0.18);
+    }
 
     .login-form {
-      gap: 1rem;
       display: flex;
       flex-direction: column;
-      .field-container {
-        display: flex;
-        flex-direction: column;
-        .field-error {
-          color: #dc2626;
-          margin: 0.5rem 0 0 0;
-          font-size: 0.875rem;
-        }
-      }
+      gap: 1.25rem;
     }
 
     .forgot-password-login {
       display: flex;
       justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+      margin-top: -0.5rem;
 
       .forgot-password-link {
         cursor: pointer;
-        margin-left: auto;
-        font-weight: 400;
-        font-size: 1rem;
-        line-height: 1rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        color: #3220b5;
       }
     }
+
     .social-login-wrapper {
       display: flex;
       flex-direction: column;
-      align-items: center;
+      align-items: stretch;
       gap: 1rem;
+
       .social-login-buttons {
         display: flex;
         flex-direction: column;
-        gap: 1rem;
+        gap: 0.85rem;
       }
     }
   }
 
   @media (max-width: 600px) {
+    padding: 1rem;
+
     .login-container {
-      width: 90%;
-      min-width: unset;
-
-      .login-form {
-        gap: 1rem;
-      }
-
-      .forgot-password-login {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.5rem;
-
-        .forgot-password-link {
-          margin-left: 0;
-          font-size: 0.875rem;
-        }
-      }
+      border-radius: 24px;
+      padding: 2rem;
     }
   }
 }

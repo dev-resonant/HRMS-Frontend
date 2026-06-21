@@ -5,6 +5,20 @@ export const isDemo = () => {
   return import.meta.env?.VITE_IS_DEMO === "true";
 };
 
+const base64UrlEncode = (value) =>
+  btoa(value)
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/, "");
+
+const jwt_encode = (payload, secret) => {
+  const header = { alg: "HS256", typ: "JWT" };
+  const encodedHeader = base64UrlEncode(JSON.stringify(header));
+  const encodedPayload = base64UrlEncode(JSON.stringify(payload));
+  const signature = base64UrlEncode(secret || "");
+  return `${encodedHeader}.${encodedPayload}.${signature}`;
+};
+
 // Demo JWT secret
 const DEMO_JWT_SECRET = "demo_secret_key_12345";
 
