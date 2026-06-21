@@ -1,19 +1,41 @@
-// src/layout/Layout.jsx
+import { useState } from "react";
 import { Outlet } from "react-router";
-import { Footer } from "../components/Footer/Footer";
 import "./layout.scss";
-import { Header } from "../components/Header/Header";
 import { Sidebar } from "../components/Sidebar/Sidebar";
+import { Header } from "../components/Header/Header";
 
 export const Layout = () => {
+  const [isSidebarLocked, setIsSidebarLocked] = useState(true);
+  const [isSidebarHovered, setIsSidebarHovered] = useState(false);
+
+  const toggleSidebar = () => {
+    setIsSidebarLocked((prev) => !prev);
+  };
+
+  const handleMouseEnter = () => {
+    setIsSidebarHovered(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsSidebarHovered(false);
+  };
+
+  const isExpanded = isSidebarLocked || isSidebarHovered;
+
   return (
-    <div className={`layout`}>
-      <Header />
-      <Sidebar />
-      <main>
-        <Outlet />
-      </main>
-      <Footer />
+    <div className={`layout ${isExpanded ? "" : "collapsed"}`}>
+      <Sidebar
+        isCollapsed={!isExpanded}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+      />
+      <div className="layout-content">
+        <Header onToggleSidebar={toggleSidebar} />
+        <main>
+          <Outlet />
+        </main>
+      </div>
     </div>
   );
 };
+

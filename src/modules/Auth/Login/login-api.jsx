@@ -13,20 +13,21 @@ export function useLogin({ redirectionUrl } = {}) {
   const { protectedAxios } = useAxios();
 
   return useMutation({
-    mutationFn: (formdata) => {
+    mutationFn: ({ formdata, remember }) => {
       if (demoMode) {
         console.debug("Using demo mode for login", formdata);
         return validateDemoCredentials(formdata, "auth/login");
       }
       return protectedAxios.post("auth/login", formdata);
     },
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       toast.success(response.data.message || "Login Successful");
-      setToken(response.data.data.token);
+      setToken(response.data.data.token, variables?.remember);
       navigate(redirectionUrl || "/dashboard");
     },
     onError: (axiosError) => {
-      toast.error(axiosError?.response?.data?.message || "Server Error");
+      console.error("Login error:", axiosError);
+      toast.error(axiosError?.response?.data?.message || axiosError?.message || "Server Error");
     },
   });
 }
@@ -45,7 +46,8 @@ export function useSendOtp() {
       toast.success(response.data.message || "OTP sent successfully");
     },
     onError: (axiosError) => {
-      toast.error(axiosError?.response?.data?.message || "Server Error");
+      console.error("Send OTP error:", axiosError);
+      toast.error(axiosError?.response?.data?.message || axiosError?.message || "Server Error");
     },
   });
 }
@@ -56,19 +58,20 @@ export function useVerifyOtp({ redirectionUrl } = {}) {
   const { protectedAxios } = useAxios();
 
   return useMutation({
-    mutationFn: (formdata) => {
+    mutationFn: ({ formdata, remember }) => {
       if (demoMode) {
         return validateDemoCredentials(formdata, "auth/verifyOtp");
       }
       return protectedAxios.post("auth/verifyOtp", formdata);
     },
-    onSuccess: (response) => {
+    onSuccess: (response, variables) => {
       toast.success(response.data.message || "OTP verified successfully");
-      setToken(response.data.data.token);
+      setToken(response.data.data.token, variables?.remember);
       navigate(redirectionUrl || "/");
     },
     onError: (axiosError) => {
-      toast.error(axiosError?.response?.data?.message || "Server Error");
+      console.error("Verify OTP error:", axiosError);
+      toast.error(axiosError?.response?.data?.message || axiosError?.message || "Server Error");
     },
   });
 }

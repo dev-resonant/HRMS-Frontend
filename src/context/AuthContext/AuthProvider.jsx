@@ -3,15 +3,19 @@ import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "./AuthContextExport";
 
 export function AuthProvider({ children }) {
-  const exist_token = localStorage.getItem("token");
-  const exist_userdata = exist_token ? JSON.parse(localStorage.getItem("userdata")) : null;
-  const exist_isAuth = exist_token && exist_userdata;
+  const localToken = localStorage.getItem("token");
+  const sessionToken = sessionStorage.getItem("token");
+  const exist_token = localToken || sessionToken;
+  const exist_userdata = exist_token
+    ? JSON.parse(localStorage.getItem("userdata") || sessionStorage.getItem("userdata") || "null")
+    : null;
+  const exist_isAuth = !!(exist_token && exist_userdata);
 
   const [token, setToken] = useState(exist_token);
   const [userData, setUserData] = useState(exist_userdata);
   const [isAuth, setIsAuth] = useState(exist_isAuth);
 
-  function updateToken(token) {
+  function updateToken(token, remember = true) {
     if (!token) {
       throw new Error(`Invalid Token Passed to setToken function, Got Token: ${token}`);
     }
@@ -21,14 +25,25 @@ export function AuthProvider({ children }) {
       setIsAuth(false);
       localStorage.removeItem("token");
       localStorage.removeItem("userdata");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userdata");
       return { isAuth: false, token: null, userData: null };
     } else {
       const userdata = jwtDecode(token);
       setToken(token);
       setUserData(userdata);
       setIsAuth(true);
-      localStorage.setItem("token", token);
-      localStorage.setItem("userdata", JSON.stringify(userdata));
+      if (remember) {
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("userdata");
+        localStorage.setItem("token", token);
+        localStorage.setItem("userdata", JSON.stringify(userdata));
+      } else {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userdata");
+        sessionStorage.setItem("token", token);
+        sessionStorage.setItem("userdata", JSON.stringify(userdata));
+      }
       return { token, userData: userdata, isAuth: true };
     }
   }
@@ -37,12 +52,15 @@ export function AuthProvider({ children }) {
       if (token && userData && isAuth) {
         return { token, userData, isAuth };
       } else {
-        const exist_token = localStorage.getItem("token");
-        if (exist_token) {
-          return updateToken(exist_token);
-        } else {
-          return { isAuth: false, token: null, userData: null };
+        const localToken = localStorage.getItem("token");
+        const sessionToken = sessionStorage.getItem("token");
+        if (localToken) {
+          return updateToken(localToken, true);
         }
+        if (sessionToken) {
+          return updateToken(sessionToken, false);
+        }
+        return { isAuth: false, token: null, userData: null };
       }
     }
     return { getData, setToken: updateToken };

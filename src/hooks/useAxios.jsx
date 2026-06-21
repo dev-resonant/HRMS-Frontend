@@ -16,8 +16,8 @@ export function useAxios() {
 
   function handleError(axiosError, notify = true) {
     console.error(axiosError);
-    notify && toast.error(axiosError.response?.data?.message || "Server Error");
-    if ([401, 403].includes(axiosError.response.status)) {
+    notify && toast.error(axiosError?.response?.data?.message || axiosError?.message || "Server Error");
+    if ([401, 403].includes(axiosError?.response?.status)) {
       setToken("clearToken");
     }
     throw axiosError;

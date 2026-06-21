@@ -12,19 +12,13 @@
 import { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import GoogleIcon from "@mui/icons-material/Google";
+import { Eye, EyeOff, Globe } from "lucide-react";
 
 import { Link } from "react-router";
 import { REGEX_EMAIL, REGEX_PHONE_NO } from "../../../lib/validation-regex";
 import { SOCIAL_SIGNUP_TYPES } from "./signup-constants";
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardActions,
   CircularProgress,
   TextField,
   Typography,
@@ -105,14 +99,15 @@ export function GlobalMultiSignup({
   };
 
   const PROVIDERS = {
-    [SOCIAL_SIGNUP_TYPES.google]: { label: "Google", handler: handleGoogleSignup, icon: <GoogleIcon /> },
+    [SOCIAL_SIGNUP_TYPES.google]: { label: "Google", handler: handleGoogleSignup, icon: <Globe /> },
   };
 
   return (
-    <Card className="signup-container" elevation={3}>
-      <CardHeader title="Sign Up" />
-      <CardContent>
-        <form onSubmit={handleSubmit(submitHandler)} className="signup-form">
+    <Box className="signup-container">
+      <Typography variant="h4" component="h1" gutterBottom>
+        Sign Up
+      </Typography>
+      <form onSubmit={handleSubmit(submitHandler)} className="signup-form">
           {/* EMAIL OTP */}
           {mode === "emailOtp" && (
             <>
@@ -312,7 +307,7 @@ export function GlobalMultiSignup({
                         endAdornment: (
                           <InputAdornment position="end">
                             <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
+                              {showPassword ? <EyeOff /> : <Eye />}
                             </IconButton>
                           </InputAdornment>
                         ),
@@ -347,7 +342,7 @@ export function GlobalMultiSignup({
                         endAdornment: (
                           <InputAdornment position="end">
                             <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
-                              {showConfirmPassword ? <VisibilityOff /> : <Visibility />}
+                              {showConfirmPassword ? <EyeOff /> : <Eye />}
                             </IconButton>
                           </InputAdornment>
                         ),
@@ -359,56 +354,55 @@ export function GlobalMultiSignup({
               />
             </>
           )}
-        </form>
-      </CardContent>
-      <CardActions sx={{ flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
-        {/* SUBMIT BUTTON */}
-        <Button
-          onClick={handleSubmit(submitHandler)}
-          variant="contained"
-          startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
-          disabled={isLoading}
-          fullWidth
-        >
-          {buttonText}
-        </Button>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
+          {/* SUBMIT BUTTON */}
+          <Button
+            type="submit"
+            variant="contained"
+            startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
+            disabled={isLoading}
+            fullWidth
+          >
+            {buttonText}
+          </Button>
 
-        <Box sx={{ textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            Already have an account?{" "}
-            <Link to="/login" style={{ color: "primary.main", textDecoration: "none", fontWeight: 500 }}>
-              Login
-            </Link>
-          </Typography>
-        </Box>
-
-        {social_signup_options.length > 0 && (
-          <Box className="social-signup-wrapper">
-            <Typography color="text.secondary" variant="body2" align="center">
-              Or
+          <Box sx={{ textAlign: "center" }}>
+            <Typography variant="body2" color="text.secondary">
+              Already have an account?{" "}
+              <Link to="/login" style={{ color: "primary.main", textDecoration: "none", fontWeight: 500 }}>
+                Login
+              </Link>
             </Typography>
-
-            <Box className="social-signup-buttons" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {social_signup_options.map((key) => {
-                const provider = PROVIDERS[key];
-                if (!provider) return null;
-
-                return (
-                  <Button
-                    key={key}
-                    variant="outlined"
-                    onClick={provider.handler}
-                    startIcon={provider.icon}
-                    fullWidth
-                  >
-                    Continue with {provider.label}
-                  </Button>
-                );
-              })}
-            </Box>
           </Box>
-        )}
-      </CardActions>
-    </Card>
+
+          {social_signup_options.length > 0 && (
+            <Box className="social-signup-wrapper">
+              <Typography color="text.secondary" variant="body2" align="center">
+                Or
+              </Typography>
+
+              <Box className="social-signup-buttons" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+                {social_signup_options.map((key) => {
+                  const provider = PROVIDERS[key];
+                  if (!provider) return null;
+
+                  return (
+                    <Button
+                      key={key}
+                      variant="outlined"
+                      onClick={provider.handler}
+                      startIcon={provider.icon}
+                      fullWidth
+                    >
+                      Continue with {provider.label}
+                    </Button>
+                  );
+                })}
+              </Box>
+            </Box>
+          )}
+        </Box>
+      </form>
+    </Box>
   );
 }

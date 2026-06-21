@@ -13,20 +13,16 @@
 import React, { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 
-import Visibility from "@mui/icons-material/Visibility";
-import VisibilityOff from "@mui/icons-material/VisibilityOff";
-import GoogleIcon from "@mui/icons-material/Google";
+import { Eye, EyeOff, Globe, Lock } from "lucide-react";
 
 import { Link } from "react-router";
 import { REGEX_EMAIL, REGEX_PHONE_NO } from "../../../lib/validation-regex";
 import { SOCIAL_LOGIN_TYPES } from "./login-constants";
 import {
   Button,
-  Card,
-  CardContent,
-  CardHeader,
-  CardActions,
+  Checkbox,
   CircularProgress,
+  FormControlLabel,
   TextField,
   Typography,
   IconButton,
@@ -44,6 +40,7 @@ export function GlobalMultiLogin({
 }) {
   const [otpSent, setOtpSent] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const { control, handleSubmit, trigger, getValues, watch } = useForm({
     defaultValues: {
@@ -61,8 +58,8 @@ export function GlobalMultiLogin({
     return "Submit";
   }, [isLoading, otpSent]);
 
-  const loginHandler = (data) => {
-    onLogin?.(data);
+  const loginHandler = (data, remember) => {
+    onLogin?.(data, remember);
   };
 
   const submitHandler = async (data) => {
@@ -71,7 +68,7 @@ export function GlobalMultiLogin({
       return verifyOtpHandler(data);
     }
 
-    return loginHandler(data);
+    return loginHandler(data, rememberMe);
   };
 
   const sendOtpHandler = async () => {
@@ -93,10 +90,13 @@ export function GlobalMultiLogin({
     const isValid = await trigger("otp");
     if (!isValid) return;
 
-    verifyOtp?.({
-      ...data,
-      type: mode === "emailOtp" ? "email" : "number",
-    });
+    verifyOtp?.(
+      {
+        ...data,
+        type: mode === "emailOtp" ? "email" : "number",
+      },
+      rememberMe,
+    );
   };
 
   const handleGoogleLogin = () => {
@@ -104,7 +104,7 @@ export function GlobalMultiLogin({
   };
 
   const PROVIDERS = {
-    [SOCIAL_LOGIN_TYPES.google]: { label: "Google", handler: handleGoogleLogin, icon: <GoogleIcon /> },
+    [SOCIAL_LOGIN_TYPES.google]: { label: "Google", handler: handleGoogleLogin, icon: <Globe /> },
     // [SOCIAL_LOGIN_TYPES.microsoft]: {
     //   label: "Microsoft",
     //   icon: <Microsoft />,
@@ -115,233 +115,268 @@ export function GlobalMultiLogin({
   };
 
   return (
-    <Card className="login-container" elevation={3}>
-      <CardHeader title="Login" />
-      <CardContent>
-        <form onSubmit={handleSubmit(submitHandler)} className="login-form">
-          {/* EMAIL OTP */}
-          {mode === "emailOtp" && (
-            <>
-              {!otpSent && (
+    <Box className="login-container">
+      <Box className="login-header">
+        <Box className="logo-circle">
+          <Lock size={22} />
+        </Box>
+
+        <Box>
+          <Typography variant="h4" component="h1" gutterBottom>
+            Welcome Back
+          </Typography>
+          <Typography variant="body2" component="p" color="text.secondary">
+            Sign in to your Core Human Capital account
+          </Typography>
+        </Box>
+      </Box>
+
+      <form onSubmit={handleSubmit(submitHandler)} className="login-form">
+        {/* EMAIL OTP */}
+        {mode === "emailOtp" && (
+          <>
+            {!otpSent && (
+              <TextField
+                id="email-input"
+                label="Email"
+                placeholder="Enter email"
+                type="email"
+                fullWidth
+                required
+                error={!!control._formState.errors.email}
+                helperText={control._formState.errors.email?.message}
+                {...control.register("email", {
+                  required: "Email required",
+                  pattern: { value: REGEX_EMAIL, message: "Invalid email" },
+                })}
+              />
+            )}
+
+            {otpSent && (
+              <TextField
+                id="otp"
+                label="OTP"
+                placeholder="Enter otp"
+                fullWidth
+                required
+                error={!!control._formState.errors.otp}
+                helperText={control._formState.errors.otp?.message}
+                {...control.register("otp", {
+                  required: "OTP required",
+                  minLength: { value: 4, message: "Min 4 digits" },
+                  maxLength: { value: 6, message: "Max 6 digits" },
+                })}
+              />
+            )}
+          </>
+        )}
+
+        {/* NUMBER OTP */}
+        {mode === "numberOtp" && (
+          <>
+            {!otpSent && (
+              <TextField
+                id="mobile-number"
+                label="Mobile Number"
+                placeholder="Enter mobile number"
+                fullWidth
+                required
+                error={!!control._formState.errors.number}
+                helperText={control._formState.errors.number?.message}
+                {...control.register("number", {
+                  minLength: { value: 10, message: "Min 10 digits" },
+                  required: "Mobile number required",
+                  pattern: { value: REGEX_PHONE_NO, message: "Enter valid 10-digit number" },
+                })}
+              />
+            )}
+
+            {otpSent && (
+              <TextField
+                id="otp-sent"
+                label="OTP"
+                placeholder="Enter otp"
+                fullWidth
+                required
+                error={!!control._formState.errors.otp}
+                helperText={control._formState.errors.otp?.message}
+                {...control.register("otp", {
+                  required: "OTP required",
+                  minLength: { value: 4, message: "Min 4 digits" },
+                  maxLength: { value: 6, message: "Max 6 digits" },
+                })}
+              />
+            )}
+          </>
+        )}
+
+        {/* EMAIL + PASSWORD */}
+        {mode === "emailPassword" && (
+          <>
+            <Controller
+              name="email"
+              control={control}
+              rules={{
+                required: "Email required",
+                pattern: { value: REGEX_EMAIL, message: "Invalid email" },
+              }}
+              render={({ field, fieldState: { error } }) => (
                 <TextField
-                  id="email-input"
+                  {...field}
+                  id="email-input-password"
                   label="Email"
                   placeholder="Enter email"
+                  autoComplete="username"
+                  error={!!error}
                   type="email"
                   fullWidth
                   required
-                  error={!!control._formState.errors.email}
-                  helperText={control._formState.errors.email?.message}
-                  {...control.register("email", {
-                    required: "Email required",
-                    pattern: { value: REGEX_EMAIL, message: "Invalid email" },
-                  })}
+                  helperText={error?.message}
+                  sx={{ mb: 2 }}
                 />
               )}
+            />
 
-              {otpSent && (
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: "Password required",
+                minLength: { value: 6, message: "Min 6 chars" },
+              }}
+              render={({ field, fieldState: { error } }) => (
                 <TextField
-                  id="otp"
-                  label="OTP"
-                  placeholder="Enter otp"
+                  {...field}
+                  id="password-input"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  error={!!error}
+                  autoComplete="current-password"
                   fullWidth
                   required
-                  error={!!control._formState.errors.otp}
-                  helperText={control._formState.errors.otp?.message}
-                  {...control.register("otp", {
-                    required: "OTP required",
-                    minLength: { value: 4, message: "Min 4 digits" },
-                    maxLength: { value: 6, message: "Max 6 digits" },
-                  })}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <EyeOff /> : <Eye />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  helperText={error?.message}
                 />
               )}
-            </>
-          )}
+            />
+            <Box className="forgot-password-login" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(event) => setRememberMe(event.target.checked)}
+                    color="primary"
+                  />
+                }
+                label="Remember me"
+              />
+              <Link
+                to={{ pathname: "/forgot-password" }}
+                state={{ formdata: { email: watch("email") } }}
+                className="forgot-password-link"
+                style={{ marginLeft: "auto" }}
+              >
+                Forgot Password ?
+              </Link>
+            </Box>
+          </>
+        )}
 
-          {/* NUMBER OTP */}
-          {mode === "numberOtp" && (
-            <>
-              {!otpSent && (
+        {/* USERNAME + PASSWORD */}
+        {mode === "usernamePassword" && (
+          <>
+            <Controller
+              name="user_name"
+              control={control}
+              rules={{
+                required: "Username required",
+                minLength: { value: 3, message: "Min 3 chars" },
+              }}
+              render={({ field, fieldState: { error } }) => (
                 <TextField
-                  id="mobile-number"
-                  label="Mobile Number"
-                  placeholder="Enter mobile number"
+                  id="username-input"
+                  {...field}
+                  label="Username"
+                  placeholder="Enter username"
+                  autoComplete="username"
+                  error={!!error}
                   fullWidth
                   required
-                  error={!!control._formState.errors.number}
-                  helperText={control._formState.errors.number?.message}
-                  {...control.register("number", {
-                    minLength: { value: 10, message: "Min 10 digits" },
-                    required: "Mobile number required",
-                    pattern: { value: REGEX_PHONE_NO, message: "Enter valid 10-digit number" },
-                  })}
+                  helperText={error?.message}
+                  sx={{ mb: 2 }}
                 />
               )}
+            />
 
-              {otpSent && (
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: "Password required",
+                minLength: { value: 6, message: "Min 6 chars" },
+              }}
+              render={({ field, fieldState: { error } }) => (
                 <TextField
-                  id="otp-sent"
-                  label="OTP"
-                  placeholder="Enter otp"
+                  {...field}
+                  id="password-input"
+                  label="Password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="Enter password"
+                  error={!!error}
+                  autoComplete="current-password"
                   fullWidth
                   required
-                  error={!!control._formState.errors.otp}
-                  helperText={control._formState.errors.otp?.message}
-                  {...control.register("otp", {
-                    required: "OTP required",
-                    minLength: { value: 4, message: "Min 4 digits" },
-                    maxLength: { value: 6, message: "Max 6 digits" },
-                  })}
+                  slotProps={{
+                    input: {
+                      endAdornment: (
+                        <InputAdornment position="end">
+                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                            {showPassword ? <EyeOff /> : <Eye />}
+                          </IconButton>
+                        </InputAdornment>
+                      ),
+                    },
+                  }}
+                  helperText={error?.message}
                 />
               )}
-            </>
-          )}
-
-          {/* EMAIL + PASSWORD */}
-          {mode === "emailPassword" && (
-            <>
-              <Controller
-                name="email"
-                control={control}
-                rules={{
-                  required: "Email required",
-                  pattern: { value: REGEX_EMAIL, message: "Invalid email" },
-                }}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    id="email-input-password"
-                    label="Email"
-                    placeholder="Enter email"
-                    autoComplete="username"
-                    error={!!error}
-                    type="email"
-                    fullWidth
-                    required
-                    helperText={error?.message}
-                    sx={{ mb: 2 }}
+            />
+            <Box className="forgot-password-login" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
+              <FormControlLabel
+                control={
+                  <Checkbox
+                    checked={rememberMe}
+                    onChange={(event) => setRememberMe(event.target.checked)}
+                    color="primary"
                   />
-                )}
+                }
+                label="Remember me"
               />
+              <Link
+                to={{ pathname: "/forgot-password" }}
+                state={{ formdata: { email: watch("email") } }}
+                className="forgot-password-link"
+                style={{ marginLeft: "auto" }}
+              >
+                Forgot Password ?
+              </Link>
+            </Box>
+          </>
+        )}
+      </form>
 
-              <Controller
-                name="password"
-                control={control}
-                rules={{
-                  required: "Password required",
-                  minLength: { value: 6, message: "Min 6 chars" },
-                }}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    id="password-input"
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter password"
-                    error={!!error}
-                    autoComplete="current-password"
-                    fullWidth
-                    required
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                    helperText={error?.message}
-                  />
-                )}
-              />
-              <Box className="forgot-password-login" sx={{ textAlign: "right", mt: 1 }}>
-                <Link
-                  to={{ pathname: "/forgot-password" }}
-                  state={{ formdata: { email: watch("email") } }}
-                  className="forgot-password-link"
-                >
-                  Forgot Password ?
-                </Link>
-              </Box>
-            </>
-          )}
-
-          {/* USERNAME + PASSWORD */}
-          {mode === "usernamePassword" && (
-            <>
-              <Controller
-                name="user_name"
-                control={control}
-                rules={{
-                  required: "Username required",
-                  minLength: { value: 3, message: "Min 3 chars" },
-                }}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    id="username-input"
-                    {...field}
-                    label="Username"
-                    placeholder="Enter username"
-                    autoComplete="username"
-                    error={!!error}
-                    fullWidth
-                    required
-                    helperText={error?.message}
-                    sx={{ mb: 2 }}
-                  />
-                )}
-              />
-
-              <Controller
-                name="password"
-                control={control}
-                rules={{
-                  required: "Password required",
-                  minLength: { value: 6, message: "Min 6 chars" },
-                }}
-                render={({ field, fieldState: { error } }) => (
-                  <TextField
-                    {...field}
-                    id="password-input"
-                    label="Password"
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter password"
-                    error={!!error}
-                    autoComplete="current-password"
-                    fullWidth
-                    required
-                    slotProps={{
-                      input: {
-                        endAdornment: (
-                          <InputAdornment position="end">
-                            <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                              {showPassword ? <VisibilityOff /> : <Visibility />}
-                            </IconButton>
-                          </InputAdornment>
-                        ),
-                      },
-                    }}
-                    helperText={error?.message}
-                  />
-                )}
-              />
-              <Box className="forgot-password-login" sx={{ textAlign: "right", mt: 1 }}>
-                <Link
-                  to={{ pathname: "/forgot-password" }}
-                  state={{ formdata: { email: watch("email") } }}
-                  className="forgot-password-link"
-                >
-                  Forgot Password ?
-                </Link>
-              </Box>
-            </>
-          )}
-        </form>
-      </CardContent>
-      <CardActions sx={{ flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
         {/* SUBMIT BUTTON */}
         <Button
           onClick={handleSubmit(submitHandler)}
@@ -388,7 +423,7 @@ export function GlobalMultiLogin({
             </Box>
           </Box>
         )}
-      </CardActions>
-    </Card>
+      </Box>
+    </Box>
   );
 }
