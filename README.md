@@ -1,16 +1,59 @@
-# React + Vite
+# ProHRM Enterprise Suite
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ProHRM is a modern, responsive Human Resource Management System (HRMS) built to manage employees, roles, permissions, and attendance across an entire organization. It features a sleek "Modern SaaS" aesthetic with a custom Material UI theme, ensuring a premium user experience.
 
-Currently, two official plugins are available:
+## Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Role & Permission Management**: Detailed matrices to configure access levels for Employees, Managers, HR Admins, and Super Admins.
+- **Sleek UI/UX**: Globally themed Material UI components (glassmorphism tables, modern rounded buttons, and crisp typography) powered by the `Outfit` font family.
+- **Persistent Sidebar**: A fully responsive sidebar navigation with collapse/expand animations and an embedded user profile.
+- **Advanced List Filtering**: GitHub-style filter search bars applied to data grids for quick searching, sorting, and tag-based filtering.
 
-## React Compiler
+## Tech Stack
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Framework**: React 19 + Vite
+- **Routing**: React Router v7
+- **UI Component Library**: Material UI (MUI)
+- **Styling**: SCSS + MUI `ThemeProvider` overrides
+- **Icons**: Lucide React
+- **Form Handling**: React Hook Form + Zod (Validation)
+- **State/Data Fetching**: React Query & Axios
 
-## Expanding the ESLint configuration
+## Getting Started
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Prerequisites
+Make sure you have Node.js installed.
+
+### Installation
+
+1. Clone the repository and navigate into the project directory.
+2. Install the dependencies:
+   ```bash
+   npm install
+   ```
+
+### Running Locally
+
+To start the development server with Hot Module Replacement (HMR):
+```bash
+npm run dev
+```
+
+### Building for Production
+
+To create a production-ready build:
+```bash
+npm run build
+```
+
+You can preview the built production app locally using:
+```bash
+npm run preview
+```
+
+## Project Structure (Highlights)
+
+- `/src/context/index.jsx` - The global application context, providing Theme, Auth, Query, and Toast configurations.
+- `/src/components/Sidebar` - The persistent navigation drawer with open/close states.
+- `/src/components/application/ListFilterBar.jsx` - Reusable search and filter component used across list pages.
+- `/src/modules/` - Feature-specific modules (e.g., Roles, Permissions).

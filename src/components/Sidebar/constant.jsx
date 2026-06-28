@@ -5,6 +5,7 @@ import {
   Shield as Roles,
   BarChart3 as AuditLogs,
   Settings as SettingsIcon,
+  Key as PermissionsIcon
 } from "lucide-react";
 
 export const sidebarMenu = [
@@ -26,7 +27,12 @@ export const sidebarMenu = [
   {
     label: "Roles",
     icon: <Roles size={20} />,
-    url: "/roles",
+    url: "/roles/list",
+  },
+  {
+    label: "Permissions",
+    icon: <PermissionsIcon size={20} />,
+    url: "/permissions/list",
   },
   {
     label: "Audit Logs",
