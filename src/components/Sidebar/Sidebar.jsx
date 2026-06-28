@@ -231,7 +231,7 @@ export const Sidebar = ({ isCollapsed, onMouseEnter, onMouseLeave }) => {
             gap: 0.5,
           }}
         >
-          <Box sx={{ display: "flex", alignItems: "center", justifyContent: isCollapsed ? "center" : "flex-start", gap: 1, width: "100%", overflow: "hidden" }}>
+          <Box sx={{ display: "flex", alignItems: "center", justifyContent: isCollapsed ? "center" : "flex-start", gap: isCollapsed ? 0 : 1, width: "100%", overflow: "hidden" }}>
             <Box
               sx={{
                 display: "flex",
