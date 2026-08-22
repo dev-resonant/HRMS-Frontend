@@ -2,13 +2,13 @@ export const DEMO_CREDENTIALS = {
   // Mode : Email + Password
   emailPassword: [
     {
-      email: "smit@gmail.com",
-      password: "Smit@1234",
+      email: "het@gmail.com",
+      password: "Het@1234",
       role: "admin",
     },
     {
-      email: "het@gmail.com",
-      password: "Het@1234",
+      email: "smit@gmail.com",
+      password: "Smit@1234",
       role: "user",
     },
     {
@@ -40,7 +40,7 @@ export const DEMO_CREDENTIALS = {
   // Mode : Email + OTP
   emailOtp: [
     {
-      email: "Het@gmail.com",
+      email: "het@gmail.com",
       otp: "1234",
       role: "admin",
     },

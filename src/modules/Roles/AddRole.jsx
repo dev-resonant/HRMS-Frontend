@@ -1,43 +1,179 @@
-import React from 'react';
-import { Box, Typography, Button, Paper, TextField, Grid } from '@mui/material';
-import { useNavigate } from 'react-router';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import {
+  Grid,
+  Column,
+  TextInput,
+  TextArea,
+  Select,
+  SelectItem,
+  Button,
+  Heading,
+  Section,
+  Form,
+} from "@carbon/react";
+import { useNavigate } from "react-router";
+import { ArrowLeft, Save } from "@carbon/icons-react";
+import "./roles.scss";
 
 export const AddRole = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    roleName: "",
+    roleCategory: "Operations",
+    dataScope: "Entire company",
+    capabilities: "",
+  });
+
+  const scopePresets = [
+    "Entire platform (all companies)",
+    "Entire company",
+    "Own department only",
+    "Direct reports only",
+    "Own self-service data only",
+  ];
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSelectPreset = (preset) => {
+    setFormData((prev) => ({ ...prev, dataScope: preset }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.debug("Saving Role:", formData);
+    navigate("/roles/list");
+  };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <Button 
-          startIcon={<ArrowLeft size={18} />} 
-          onClick={() => navigate('/roles/list')}
-          color="inherit"
+    <Section className="roles-page-container animate-fade-in">
+      <div className="page-header-row">
+        <Button
+          kind="ghost"
+          size="md"
+          renderIcon={ArrowLeft}
+          onClick={() => navigate("/roles/list")}
+          style={{ marginBottom: "0.75rem" }}
         >
-          Back
+          Back to Roles
         </Button>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>Add New Role</Typography>
-      </Box>
+        <Heading className="page-title">Define New Role</Heading>
+        <p className="page-description">
+          Create a new role definition, assign scope visibility boundaries, and define capabilities.
+        </p>
+      </div>
 
-      <Paper sx={{ p: 3, border: '1px solid #e0e0e0' }} elevation={0}>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Role Name" variant="outlined" placeholder="e.g. HR Admin" />
+      <div className="roles-form-card">
+        <Form onSubmit={handleSubmit}>
+          <Grid fullWidth narrow>
+            {/* Section 1: General Details */}
+            <Column sm={4} md={8} lg={16} className="form-section-title-wrap">
+              <span className="section-step-num">1</span>
+              <Heading className="section-title">General Information</Heading>
+            </Column>
+
+            <Column sm={4} md={4} lg={8}>
+              <TextInput
+                id="role-name"
+                labelText="Role Name"
+                placeholder="e.g. Talent Acquisition Lead"
+                required
+                value={formData.roleName}
+                onChange={(e) => handleChange("roleName", e.target.value)}
+                helperText="Specify a unique and descriptive title for this role"
+              />
+            </Column>
+
+            <Column sm={4} md={4} lg={8}>
+              <Select
+                id="role-category"
+                labelText="Role Category"
+                value={formData.roleCategory}
+                onChange={(e) => handleChange("roleCategory", e.target.value)}
+                helperText="Groups similar roles for organizational reporting"
+              >
+                <SelectItem value="Executive" text="Executive / Governance" />
+                <SelectItem value="HR Administration" text="HR Administration" />
+                <SelectItem value="Management" text="Team Management" />
+                <SelectItem value="Operations" text="Operations & Staff" />
+                <SelectItem value="Self-Service" text="Self-Service Employee" />
+              </Select>
+            </Column>
+
+            {/* Section 2: Data Scope Configuration */}
+            <Column sm={4} md={8} lg={16} className="form-section-title-wrap" style={{ marginTop: "2rem" }}>
+              <span className="section-step-num">2</span>
+              <Heading className="section-title">Data Visibility & Scope</Heading>
+            </Column>
+
+            <Column sm={4} md={8} lg={16}>
+              <div className="preset-scope-chips">
+                <span className="preset-label">Quick Presets:</span>
+                {scopePresets.map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    className={`preset-scope-chip ${formData.dataScope === preset ? "selected" : ""}`}
+                    onClick={() => handleSelectPreset(preset)}
+                  >
+                    {preset}
+                  </button>
+                ))}
+              </div>
+
+              <TextInput
+                id="data-scope"
+                labelText="Custom Data Scope Description"
+                placeholder="e.g. Own department & designated subsidiaries"
+                required
+                value={formData.dataScope}
+                onChange={(e) => handleChange("dataScope", e.target.value)}
+                helperText="Defines which specific organizational branch this role governs"
+              />
+            </Column>
+
+            {/* Section 3: Capabilities Description */}
+            <Column sm={4} md={8} lg={16} className="form-section-title-wrap" style={{ marginTop: "2rem" }}>
+              <span className="section-step-num">3</span>
+              <Heading className="section-title">Privileges & Responsibilities</Heading>
+            </Column>
+
+            <Column sm={4} md={8} lg={16}>
+              <TextArea
+                id="capabilities-description"
+                labelText="Capabilities & Permission Scope Description"
+                placeholder="Detail what actions, approvals, and reports this role can execute..."
+                rows={4}
+                value={formData.capabilities}
+                onChange={(e) => handleChange("capabilities", e.target.value)}
+                helperText="Provide a clear description for audit and compliance reviews"
+              />
+            </Column>
+
+            {/* Form Action Footer */}
+            <Column sm={4} md={8} lg={16}>
+              <div className="form-actions-row">
+                <Button
+                  kind="secondary"
+                  size="md"
+                  onClick={() => navigate("/roles/list")}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  kind="primary"
+                  size="md"
+                  type="submit"
+                  renderIcon={Save}
+                >
+                  Save & Activate Role
+                </Button>
+              </div>
+            </Column>
           </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Data Scope" variant="outlined" placeholder="e.g. Entire company" />
-          </Grid>
-          <Grid size={{ xs: 12 }}>
-            <TextField fullWidth label="Capabilities Description" variant="outlined" multiline rows={4} />
-          </Grid>
-          <Grid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2 }}>
-            <Button variant="outlined" onClick={() => navigate('/roles/list')}>Cancel</Button>
-            <Button variant="contained" sx={{ backgroundColor: '#3F4B8D', '&:hover': { backgroundColor: '#2d3770' } }}>
-              Save Role
-            </Button>
-          </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+        </Form>
+      </div>
+    </Section>
   );
 };

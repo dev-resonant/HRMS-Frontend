@@ -1,88 +1,75 @@
-/**
- * GlobalMultiLogin
- *
- * Supports:
- * - Email OTP
- * - Number OTP
- * - Email + Password
- * - Username + Password
- *
- * Parent controls the mode using:  mode="emailOtp" | "numberOtp" | "emailPassword" | "usernamePassword"
- */
-
-import React, { useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
-
-import { Eye, EyeOff, Globe, Lock } from "lucide-react";
-
 import { Link } from "react-router";
+import {
+  TextInput,
+  PasswordInput,
+  Checkbox,
+  Button,
+  InlineLoading,
+  Heading,
+  Stack,
+} from "@carbon/react";
+import { ArrowRight, Enterprise, Globe } from "@carbon/icons-react";
 import { REGEX_EMAIL, REGEX_PHONE_NO } from "../../../lib/validation-regex";
 import { SOCIAL_LOGIN_TYPES } from "./login-constants";
-import {
-  Button,
-  Checkbox,
-  CircularProgress,
-  FormControlLabel,
-  TextField,
-  Typography,
-  IconButton,
-  InputAdornment,
-  Box,
-} from "@mui/material";
+import "./login.scss";
 
 export function GlobalMultiLogin({
-  mode = "usernamePassword",
-  social_login_options = [],
+  social_login_options = ["google"],
   sendOtp,
   verifyOtp,
   onLogin,
   isLoading = false,
 }) {
+  const [activeTab, setActiveTab] = useState("password");
   const [otpSent, setOtpSent] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  const { control, handleSubmit, trigger, getValues, watch } = useForm({
+  const {
+    control,
+    handleSubmit,
+    trigger,
+    getValues,
+    watch,
+    register,
+    setValue,
+    formState: { errors },
+  } = useForm({
     defaultValues: {
-      email: "",
+      email: "het@gmail.com",
       number: "",
       otp: "",
-      user_name: "",
-      password: "",
+      password: "Het@1234",
     },
   });
 
   const buttonText = useMemo(() => {
-    if (isLoading) return "Submitting...";
-    if (otpSent) return "Verify OTP";
-    return "Submit";
-  }, [isLoading, otpSent]);
+    if (isLoading) return "Signing in...";
+    if (otpSent) return "Verify & Sign In";
+    if (activeTab === "password") return "Sign In";
+    return "Send Passcode";
+  }, [isLoading, otpSent, activeTab]);
 
   const loginHandler = (data, remember) => {
     onLogin?.(data, remember);
   };
 
   const submitHandler = async (data) => {
-    if (mode === "emailOtp" || mode === "numberOtp") {
+    if (activeTab === "emailOtp" || activeTab === "numberOtp") {
       if (!otpSent) return sendOtpHandler();
       return verifyOtpHandler(data);
     }
-
     return loginHandler(data, rememberMe);
   };
 
   const sendOtpHandler = async () => {
-    const field = mode === "emailOtp" ? "email" : "number";
-
+    const field = activeTab === "emailOtp" ? "email" : "number";
     const isValid = await trigger(field);
     if (!isValid) return;
 
     const value = getValues(field);
-
-    sendOtp?.({
-      [field]: value,
-    });
-
+    sendOtp?.({ [field]: value });
     setOtpSent(true);
   };
 
@@ -93,337 +80,259 @@ export function GlobalMultiLogin({
     verifyOtp?.(
       {
         ...data,
-        type: mode === "emailOtp" ? "email" : "number",
+        type: activeTab === "emailOtp" ? "email" : "number",
       },
-      rememberMe,
+      rememberMe
     );
   };
 
+  const handleFillDemo = () => {
+    setValue("email", "het@gmail.com");
+    setValue("password", "Het@1234");
+  };
+
   const handleGoogleLogin = () => {
-    console.log("Google login clicked");
+    console.debug("Google login clicked");
   };
 
   const PROVIDERS = {
-    [SOCIAL_LOGIN_TYPES.google]: { label: "Google", handler: handleGoogleLogin, icon: <Globe /> },
-    // [SOCIAL_LOGIN_TYPES.microsoft]: {
-    //   label: "Microsoft",
-    //   icon: <Microsoft />,
-    //   handler: onMicrosoftLogin,
-    // },
-    // [SOCIAL_LOGIN_TYPES.email]: { label: "Email", icon: <Email />, handler: onEmailLogin },
-    // [SOCIAL_LOGIN_TYPES.apple]: { label: "Apple", icon: <Apple />, handler: onAppleLogin },
+    [SOCIAL_LOGIN_TYPES.google]: {
+      label: "Google",
+      handler: handleGoogleLogin,
+      icon: Globe,
+    },
   };
 
   return (
-    <Box className="login-container">
-      <Box className="login-header">
-        <Box className="logo-circle">
-          <Lock size={22} />
-        </Box>
+    <div className="simple-auth-page">
+      <div className="simple-login-container animate-fade-in">
+        {/* Simple Brand Header */}
+        <div className="simple-auth-header">
+          <div className="brand-badge">
+            <Enterprise size={24} />
+          </div>
+          <Heading className="brand-title">ProHRM</Heading>
+          <p className="brand-tagline">Sign in to your account</p>
+        </div>
 
-        <Box>
-          <Typography variant="h4" component="h1" gutterBottom>
-            Welcome Back
-          </Typography>
-          <Typography variant="body2" component="p" color="text.secondary">
-            Sign in to your Core Human Capital account
-          </Typography>
-        </Box>
-      </Box>
+        {/* Mode Switcher Tabs */}
+        <div className="simple-auth-tabs">
+          <button
+            type="button"
+            className={`tab-item ${activeTab === "password" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("password");
+              setOtpSent(false);
+            }}
+          >
+            Password
+          </button>
+          <button
+            type="button"
+            className={`tab-item ${activeTab === "emailOtp" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("emailOtp");
+              setOtpSent(false);
+            }}
+          >
+            Email OTP
+          </button>
+          <button
+            type="button"
+            className={`tab-item ${activeTab === "numberOtp" ? "active" : ""}`}
+            onClick={() => {
+              setActiveTab("numberOtp");
+              setOtpSent(false);
+            }}
+          >
+            Phone OTP
+          </button>
+        </div>
 
-      <form onSubmit={handleSubmit(submitHandler)} className="login-form">
-        {/* EMAIL OTP */}
-        {mode === "emailOtp" && (
-          <>
-            {!otpSent && (
-              <TextField
-                id="email-input"
-                label="Email"
-                placeholder="Enter email"
-                type="email"
-                fullWidth
-                required
-                error={!!control._formState.errors.email}
-                helperText={control._formState.errors.email?.message}
-                {...control.register("email", {
-                  required: "Email required",
-                  pattern: { value: REGEX_EMAIL, message: "Invalid email" },
-                })}
-              />
-            )}
+        {/* Demo Quick Auto-Fill */}
+        <div className="simple-demo-pill">
+          <span>Demo: <strong>het@gmail.com</strong> / <strong>Het@1234</strong></span>
+          <button type="button" onClick={handleFillDemo} className="fill-btn">
+            Auto-fill
+          </button>
+        </div>
 
-            {otpSent && (
-              <TextField
-                id="otp"
-                label="OTP"
-                placeholder="Enter otp"
-                fullWidth
-                required
-                error={!!control._formState.errors.otp}
-                helperText={control._formState.errors.otp?.message}
-                {...control.register("otp", {
-                  required: "OTP required",
-                  minLength: { value: 4, message: "Min 4 digits" },
-                  maxLength: { value: 6, message: "Max 6 digits" },
-                })}
-              />
-            )}
-          </>
-        )}
-
-        {/* NUMBER OTP */}
-        {mode === "numberOtp" && (
-          <>
-            {!otpSent && (
-              <TextField
-                id="mobile-number"
-                label="Mobile Number"
-                placeholder="Enter mobile number"
-                fullWidth
-                required
-                error={!!control._formState.errors.number}
-                helperText={control._formState.errors.number?.message}
-                {...control.register("number", {
-                  minLength: { value: 10, message: "Min 10 digits" },
-                  required: "Mobile number required",
-                  pattern: { value: REGEX_PHONE_NO, message: "Enter valid 10-digit number" },
-                })}
-              />
-            )}
-
-            {otpSent && (
-              <TextField
-                id="otp-sent"
-                label="OTP"
-                placeholder="Enter otp"
-                fullWidth
-                required
-                error={!!control._formState.errors.otp}
-                helperText={control._formState.errors.otp?.message}
-                {...control.register("otp", {
-                  required: "OTP required",
-                  minLength: { value: 4, message: "Min 4 digits" },
-                  maxLength: { value: 6, message: "Max 6 digits" },
-                })}
-              />
-            )}
-          </>
-        )}
-
-        {/* EMAIL + PASSWORD */}
-        {mode === "emailPassword" && (
-          <>
-            <Controller
-              name="email"
-              control={control}
-              rules={{
-                required: "Email required",
-                pattern: { value: REGEX_EMAIL, message: "Invalid email" },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  id="email-input-password"
-                  label="Email"
-                  placeholder="Enter email"
-                  autoComplete="username"
-                  error={!!error}
-                  type="email"
-                  fullWidth
-                  required
-                  helperText={error?.message}
-                  sx={{ mb: 2 }}
-                />
-              )}
-            />
-
-            <Controller
-              name="password"
-              control={control}
-              rules={{
-                required: "Password required",
-                minLength: { value: 6, message: "Min 6 chars" },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  id="password-input"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  error={!!error}
-                  autoComplete="current-password"
-                  fullWidth
-                  required
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                            {showPassword ? <EyeOff /> : <Eye />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
+        <form onSubmit={handleSubmit(submitHandler)} className="simple-login-form">
+          <Stack gap={5}>
+            {/* Password Login */}
+            {activeTab === "password" && (
+              <>
+                <Controller
+                  name="email"
+                  control={control}
+                  rules={{
+                    required: "Email is required",
+                    pattern: { value: REGEX_EMAIL, message: "Invalid email address" },
                   }}
-                  helperText={error?.message}
+                  render={({ field, fieldState: { error } }) => (
+                    <TextInput
+                      id="login-email"
+                      labelText="Email"
+                      placeholder="het@gmail.com"
+                      type="email"
+                      required
+                      invalid={!!error}
+                      invalidText={error?.message}
+                      {...field}
+                    />
+                  )}
                 />
-              )}
-            />
-            <Box className="forgot-password-login" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-              <FormControlLabel
-                control={
-                  <Checkbox
-                    checked={rememberMe}
-                    onChange={(event) => setRememberMe(event.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="Remember me"
-              />
-              <Link
-                to={{ pathname: "/forgot-password" }}
-                state={{ formdata: { email: watch("email") } }}
-                className="forgot-password-link"
-                style={{ marginLeft: "auto" }}
-              >
-                Forgot Password ?
-              </Link>
-            </Box>
-          </>
-        )}
 
-        {/* USERNAME + PASSWORD */}
-        {mode === "usernamePassword" && (
-          <>
-            <Controller
-              name="user_name"
-              control={control}
-              rules={{
-                required: "Username required",
-                minLength: { value: 3, message: "Min 3 chars" },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  id="username-input"
-                  {...field}
-                  label="Username"
-                  placeholder="Enter username"
-                  autoComplete="username"
-                  error={!!error}
-                  fullWidth
-                  required
-                  helperText={error?.message}
-                  sx={{ mb: 2 }}
-                />
-              )}
-            />
-
-            <Controller
-              name="password"
-              control={control}
-              rules={{
-                required: "Password required",
-                minLength: { value: 6, message: "Min 6 chars" },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <TextField
-                  {...field}
-                  id="password-input"
-                  label="Password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter password"
-                  error={!!error}
-                  autoComplete="current-password"
-                  fullWidth
-                  required
-                  slotProps={{
-                    input: {
-                      endAdornment: (
-                        <InputAdornment position="end">
-                          <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
-                            {showPassword ? <EyeOff /> : <Eye />}
-                          </IconButton>
-                        </InputAdornment>
-                      ),
-                    },
+                <Controller
+                  name="password"
+                  control={control}
+                  rules={{
+                    required: "Password is required",
                   }}
-                  helperText={error?.message}
+                  render={({ field, fieldState: { error } }) => (
+                    <PasswordInput
+                      id="login-password"
+                      labelText="Password"
+                      placeholder="Het@1234"
+                      required
+                      invalid={!!error}
+                      invalidText={error?.message}
+                      {...field}
+                    />
+                  )}
                 />
-              )}
-            />
-            <Box className="forgot-password-login" sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mt: 1 }}>
-              <FormControlLabel
-                control={
+
+                <div className="form-sub-row">
                   <Checkbox
+                    id="remember-me"
+                    labelText="Remember me"
                     checked={rememberMe}
-                    onChange={(event) => setRememberMe(event.target.checked)}
-                    color="primary"
+                    onChange={(_, { checked }) => setRememberMe(checked)}
                   />
-                }
-                label="Remember me"
-              />
-              <Link
-                to={{ pathname: "/forgot-password" }}
-                state={{ formdata: { email: watch("email") } }}
-                className="forgot-password-link"
-                style={{ marginLeft: "auto" }}
-              >
-                Forgot Password ?
-              </Link>
-            </Box>
-          </>
-        )}
-      </form>
-
-      <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
-        {/* SUBMIT BUTTON */}
-        <Button
-          onClick={handleSubmit(submitHandler)}
-          variant="contained"
-          startIcon={isLoading ? <CircularProgress size={20} color="inherit" /> : null}
-          disabled={isLoading}
-          fullWidth
-        >
-          {buttonText}
-        </Button>
-
-        <Box sx={{ textAlign: "center" }}>
-          <Typography variant="body2" color="text.secondary">
-            Don't have an account?{" "}
-            <Link to="/signup" style={{ color: "primary.main", textDecoration: "none", fontWeight: 500 }}>
-              Sign Up
-            </Link>
-          </Typography>
-        </Box>
-
-        {social_login_options.length > 0 && (
-          <Box className="social-login-wrapper">
-            <Typography color="text.secondary" variant="body2" align="center">
-              Or
-            </Typography>
-
-            <Box className="social-login-buttons" sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
-              {social_login_options.map((key) => {
-                const provider = PROVIDERS[key];
-                if (!provider) return null;
-
-                return (
-                  <Button
-                    key={key}
-                    variant="outlined"
-                    onClick={provider.handler}
-                    startIcon={provider.icon}
-                    fullWidth
+                  <Link
+                    to="/forgot-password"
+                    state={{ formdata: { email: watch("email") } }}
+                    className="forgot-link"
                   >
-                    Continue with {provider.label}
-                  </Button>
-                );
-              })}
-            </Box>
-          </Box>
-        )}
-      </Box>
-    </Box>
+                    Forgot password?
+                  </Link>
+                </div>
+              </>
+            )}
+
+            {/* Email OTP */}
+            {activeTab === "emailOtp" && (
+              <>
+                {!otpSent ? (
+                  <TextInput
+                    id="login-email-otp"
+                    labelText="Email Address"
+                    placeholder="het@gmail.com"
+                    type="email"
+                    required
+                    invalid={!!errors.email}
+                    invalidText={errors.email?.message}
+                    {...register("email", {
+                      required: "Email is required",
+                      pattern: { value: REGEX_EMAIL, message: "Invalid email" },
+                    })}
+                  />
+                ) : (
+                  <TextInput
+                    id="login-otp-code"
+                    labelText="OTP Code"
+                    placeholder="Enter 4-digit OTP (1234)"
+                    required
+                    invalid={!!errors.otp}
+                    invalidText={errors.otp?.message}
+                    {...register("otp", {
+                      required: "OTP is required",
+                    })}
+                  />
+                )}
+              </>
+            )}
+
+            {/* Phone OTP */}
+            {activeTab === "numberOtp" && (
+              <>
+                {!otpSent ? (
+                  <TextInput
+                    id="login-phone-otp"
+                    labelText="Mobile Number"
+                    placeholder="9327536128"
+                    required
+                    invalid={!!errors.number}
+                    invalidText={errors.number?.message}
+                    {...register("number", {
+                      required: "Mobile number is required",
+                      pattern: {
+                        value: REGEX_PHONE_NO,
+                        message: "Enter valid 10-digit number",
+                      },
+                    })}
+                  />
+                ) : (
+                  <TextInput
+                    id="login-phone-otp-code"
+                    labelText="OTP Code"
+                    placeholder="Enter 4-digit OTP (1234)"
+                    required
+                    invalid={!!errors.otp}
+                    invalidText={errors.otp?.message}
+                    {...register("otp", {
+                      required: "OTP is required",
+                    })}
+                  />
+                )}
+              </>
+            )}
+
+            <Button
+              type="submit"
+              size="lg"
+              className="submit-btn"
+              disabled={isLoading}
+              renderIcon={isLoading ? null : ArrowRight}
+            >
+              {isLoading ? (
+                <InlineLoading status="active" description="Signing in..." />
+              ) : (
+                buttonText
+              )}
+            </Button>
+
+            <div className="signup-link-row">
+              Don&apos;t have an account? <Link to="/signup">Create account</Link>
+            </div>
+
+            {social_login_options.length > 0 && (
+              <div className="social-section">
+                <div className="or-divider">
+                  <span>OR</span>
+                </div>
+                {social_login_options.map((key) => {
+                  const provider = PROVIDERS[key];
+                  if (!provider) return null;
+                  const Icon = provider.icon;
+                  return (
+                    <Button
+                      key={key}
+                      kind="tertiary"
+                      size="md"
+                      onClick={provider.handler}
+                      renderIcon={Icon}
+                      className="social-btn"
+                    >
+                      Sign in with {provider.label}
+                    </Button>
+                  );
+                })}
+              </div>
+            )}
+          </Stack>
+        </form>
+      </div>
+    </div>
   );
 }

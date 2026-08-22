@@ -1,6 +1,7 @@
 // src/routes/private-route.jsx
 import { createBrowserRouter, Navigate } from "react-router";
 import { Layout } from "../layouts/Layout.jsx";
+import { Dashboard } from "../modules/Dashboard/Dashboard.jsx";
 import { Logout } from "../modules/Auth/Logout/Logout.jsx";
 import { RolesList } from "../modules/Roles/RolesList.jsx";
 import { AddRole } from "../modules/Roles/AddRole.jsx";
@@ -13,7 +14,7 @@ export const private_routes = createBrowserRouter([
     children: [
       {
         path: "/dashboard",
-        element: <>Dashboard</>,
+        element: <Dashboard />,
       },
       {
         path: "/applications",

@@ -1,99 +1,204 @@
-import React from 'react';
-import { Box, Typography, Button, Paper, TextField, Grid, FormControl, InputLabel, Select, MenuItem } from '@mui/material';
-import { useNavigate } from 'react-router';
-import { ArrowLeft } from 'lucide-react';
+import { useState } from "react";
+import {
+  Grid,
+  Column,
+  TextInput,
+  Select,
+  SelectItem,
+  Button,
+  Heading,
+  Section,
+  Form,
+  Tag,
+} from "@carbon/react";
+import { useNavigate } from "react-router";
+import { ArrowLeft, Save } from "@carbon/icons-react";
+import "./permissions.scss";
 
 export const AddPermission = () => {
   const navigate = useNavigate();
+  const [formData, setFormData] = useState({
+    module: "Attendance",
+    actionName: "",
+    description: "",
+    employeeScope: "-",
+    managerScope: "Team",
+    hrAdminScope: "All",
+    superAdminScope: "All",
+  });
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.debug("Saving Permission Configuration:", formData);
+    navigate("/permissions/list");
+  };
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3, gap: 2 }}>
-        <Button 
-          startIcon={<ArrowLeft size={18} />} 
-          onClick={() => navigate('/permissions/list')}
-          color="inherit"
+    <Section className="permissions-page-container animate-fade-in">
+      <div className="page-header-row">
+        <Button
+          kind="ghost"
+          size="md"
+          renderIcon={ArrowLeft}
+          onClick={() => navigate("/permissions/list")}
+          style={{ marginBottom: "0.75rem" }}
         >
-          Back
+          Back to Permissions Matrix
         </Button>
-        <Typography variant="h5" sx={{ fontWeight: 600 }}>Configure Permission</Typography>
-      </Box>
+        <Heading className="page-title">Configure Authorization Rule</Heading>
+        <p className="page-description">
+          Define permission rules, action identifiers, and specify role authorization boundaries.
+        </p>
+      </div>
 
-      <Paper sx={{ p: 3, border: '1px solid #e0e0e0' }} elevation={0}>
-        <Grid container spacing={3}>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <FormControl fullWidth>
-              <InputLabel>Module</InputLabel>
-              <Select label="Module" defaultValue="">
-                <MenuItem value="Attendance">Attendance</MenuItem>
-                <MenuItem value="Leave">Leave</MenuItem>
-                <MenuItem value="Mispunch">Mispunch</MenuItem>
-                <MenuItem value="Timesheet">Timesheet</MenuItem>
-                <MenuItem value="Employees">Employees</MenuItem>
-                <MenuItem value="Payroll">Payroll</MenuItem>
-                <MenuItem value="System">System</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 6 }}>
-            <TextField fullWidth label="Action Name" variant="outlined" placeholder="e.g. Approve team leave" />
-          </Grid>
-          
-          <Grid size={{ xs: 12 }}>
-            <Typography variant="subtitle1" sx={{ fontWeight: 600, mt: 1 }}>Role Access Levels</Typography>
-          </Grid>
-          
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>Employee Scope</InputLabel>
-              <Select label="Employee Scope" defaultValue="-">
-                <MenuItem value="-">None (-)</MenuItem>
-                <MenuItem value="Y">Allowed (Y)</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>Manager Scope</InputLabel>
-              <Select label="Manager Scope" defaultValue="-">
-                <MenuItem value="-">None (-)</MenuItem>
-                <MenuItem value="Team">Team</MenuItem>
-                <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Y">Allowed (Y)</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>HR Admin Scope</InputLabel>
-              <Select label="HR Admin Scope" defaultValue="-">
-                <MenuItem value="-">None (-)</MenuItem>
-                <MenuItem value="Team">Team</MenuItem>
-                <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Y">Allowed (Y)</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, md: 3 }}>
-            <FormControl fullWidth>
-              <InputLabel>Super Admin Scope</InputLabel>
-              <Select label="Super Admin Scope" defaultValue="-">
-                <MenuItem value="-">None (-)</MenuItem>
-                <MenuItem value="Team">Team</MenuItem>
-                <MenuItem value="All">All</MenuItem>
-                <MenuItem value="Y">Allowed (Y)</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+      <div className="permissions-form-card">
+        <Form onSubmit={handleSubmit}>
+          <Grid fullWidth narrow>
+            {/* Step 1: Module & Identifier */}
+            <Column sm={4} md={8} lg={16} className="form-section-title-wrap">
+              <span className="section-step-num">1</span>
+              <Heading className="section-title">Module & Action Details</Heading>
+            </Column>
 
-          <Grid size={{ xs: 12 }} sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
-            <Button variant="outlined" onClick={() => navigate('/permissions/list')}>Cancel</Button>
-            <Button variant="contained" sx={{ backgroundColor: '#3F4B8D', '&:hover': { backgroundColor: '#2d3770' } }}>
-              Save Permission
-            </Button>
+            <Column sm={4} md={4} lg={6}>
+              <Select
+                id="module-select"
+                labelText="Target System Module"
+                value={formData.module}
+                onChange={(e) => handleChange("module", e.target.value)}
+                helperText="System domain where this authorization applies"
+              >
+                <SelectItem value="Attendance" text="Attendance & Biometrics" />
+                <SelectItem value="Leave" text="Leave Management" />
+                <SelectItem value="Timesheet" text="Timesheet & Hours" />
+                <SelectItem value="Employees" text="Employee Master Records" />
+                <SelectItem value="Payroll" text="Payroll & Compensation" />
+                <SelectItem value="System" text="Core System Settings" />
+              </Select>
+            </Column>
+
+            <Column sm={4} md={4} lg={10}>
+              <TextInput
+                id="action-name"
+                labelText="Action Name / Identifier"
+                placeholder="e.g. Approve team leave requests"
+                required
+                value={formData.actionName}
+                onChange={(e) => handleChange("actionName", e.target.value)}
+                helperText="Unique programmatic or human-readable capability name"
+              />
+            </Column>
+
+            <Column sm={4} md={8} lg={16} style={{ marginTop: "1rem" }}>
+              <TextInput
+                id="action-description"
+                labelText="Rule Description"
+                placeholder="e.g. Permits managers to approve or reject submitted annual and sick leaves"
+                value={formData.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                helperText="Brief summary of capability scope"
+              />
+            </Column>
+
+            {/* Step 2: Role Access Matrix Scopes */}
+            <Column sm={4} md={8} lg={16} className="form-section-title-wrap" style={{ marginTop: "2rem" }}>
+              <span className="section-step-num">2</span>
+              <Heading className="section-title">Role Scope Mapping</Heading>
+            </Column>
+
+            <Column sm={4} md={2} lg={4}>
+              <div className="role-scope-input-card">
+                <Tag size="sm" type="cool-gray" className="role-chip">Employee</Tag>
+                <Select
+                  id="employee-scope"
+                  labelText="Access Scope"
+                  value={formData.employeeScope}
+                  onChange={(e) => handleChange("employeeScope", e.target.value)}
+                >
+                  <SelectItem value="-" text="None (-)" />
+                  <SelectItem value="Y" text="Allowed (Self)" />
+                </Select>
+              </div>
+            </Column>
+
+            <Column sm={4} md={2} lg={4}>
+              <div className="role-scope-input-card">
+                <Tag size="sm" type="blue" className="role-chip">Manager</Tag>
+                <Select
+                  id="manager-scope"
+                  labelText="Access Scope"
+                  value={formData.managerScope}
+                  onChange={(e) => handleChange("managerScope", e.target.value)}
+                >
+                  <SelectItem value="-" text="None (-)" />
+                  <SelectItem value="Team" text="Direct Team" />
+                  <SelectItem value="All" text="All Scopes" />
+                  <SelectItem value="Y" text="Allowed (Y)" />
+                </Select>
+              </div>
+            </Column>
+
+            <Column sm={4} md={2} lg={4}>
+              <div className="role-scope-input-card">
+                <Tag size="sm" type="purple" className="role-chip">HR Admin</Tag>
+                <Select
+                  id="hr-admin-scope"
+                  labelText="Access Scope"
+                  value={formData.hrAdminScope}
+                  onChange={(e) => handleChange("hrAdminScope", e.target.value)}
+                >
+                  <SelectItem value="-" text="None (-)" />
+                  <SelectItem value="Team" text="Direct Team" />
+                  <SelectItem value="All" text="All Company" />
+                  <SelectItem value="Y" text="Allowed (Y)" />
+                </Select>
+              </div>
+            </Column>
+
+            <Column sm={4} md={2} lg={4}>
+              <div className="role-scope-input-card">
+                <Tag size="sm" type="magenta" className="role-chip">Super Admin</Tag>
+                <Select
+                  id="super-admin-scope"
+                  labelText="Access Scope"
+                  value={formData.superAdminScope}
+                  onChange={(e) => handleChange("superAdminScope", e.target.value)}
+                >
+                  <SelectItem value="-" text="None (-)" />
+                  <SelectItem value="Team" text="Direct Team" />
+                  <SelectItem value="All" text="All Platform" />
+                  <SelectItem value="Y" text="Allowed (Y)" />
+                </Select>
+              </div>
+            </Column>
+
+            {/* Actions */}
+            <Column sm={4} md={8} lg={16}>
+              <div className="form-actions-row">
+                <Button
+                  kind="secondary"
+                  size="md"
+                  onClick={() => navigate("/permissions/list")}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  kind="primary"
+                  size="md"
+                  type="submit"
+                  renderIcon={Save}
+                >
+                  Save & Publish Rule
+                </Button>
+              </div>
+            </Column>
           </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+        </Form>
+      </div>
+    </Section>
   );
 };

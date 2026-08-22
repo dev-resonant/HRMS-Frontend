@@ -12,6 +12,7 @@ export default defineConfig([
     extends: [
       js.configs.recommended,
       react.configs.flat.recommended,
+      react.configs.flat['jsx-runtime'],
       reactHooks.configs.flat.recommended,
       reactRefresh.configs.vite,
     ],
@@ -19,8 +20,9 @@ export default defineConfig([
       globals: globals.browser,
       parserOptions: { ecmaFeatures: { jsx: true } },
     },
-    settings: { react: { version: 'detect' } },
+    settings: { react: { version: '19.0' } },
     rules: {
+      'react/prop-types': 'off',
       'no-unused-vars': 'warn',
       'no-console': ['warn', { allow: ['debug', 'warn', 'error'] }],
       'no-debugger': 'warn',

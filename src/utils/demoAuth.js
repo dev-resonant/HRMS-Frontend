@@ -105,7 +105,7 @@ const validateOtpSend = (data, resolve, reject) => {
 
 // Validate OTP verification
 const validateOtpVerify = (data, resolve, reject) => {
-  let matchedUser = null;
+  let matchedUser;
 
   if (data.email && data.otp) {
     matchedUser = DEMO_CREDENTIALS.emailOtp.find((cred) => cred.email === data.email && cred.otp === data.otp);
