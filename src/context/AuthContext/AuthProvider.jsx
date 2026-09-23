@@ -1,5 +1,4 @@
 import { useState, useMemo } from "react";
-import { jwtDecode } from "jwt-decode";
 import { AuthContext } from "./AuthContextExport";
 
 export function AuthProvider({ children }) {
@@ -15,7 +14,7 @@ export function AuthProvider({ children }) {
   const [userData, setUserData] = useState(exist_userdata);
   const [isAuth, setIsAuth] = useState(exist_isAuth);
 
-  function updateToken(token, remember = true) {
+  function updateToken(token, user, remember = true) {
     if (!token) {
       throw new Error(`Invalid Token Passed to setToken function, Got Token: ${token}`);
     }
@@ -29,22 +28,21 @@ export function AuthProvider({ children }) {
       sessionStorage.removeItem("userdata");
       return { isAuth: false, token: null, userData: null };
     } else {
-      const userdata = jwtDecode(token);
       setToken(token);
-      setUserData(userdata);
+      setUserData(user);
       setIsAuth(true);
       if (remember) {
         sessionStorage.removeItem("token");
         sessionStorage.removeItem("userdata");
         localStorage.setItem("token", token);
-        localStorage.setItem("userdata", JSON.stringify(userdata));
+        localStorage.setItem("userdata", JSON.stringify(user));
       } else {
         localStorage.removeItem("token");
         localStorage.removeItem("userdata");
         sessionStorage.setItem("token", token);
-        sessionStorage.setItem("userdata", JSON.stringify(userdata));
+        sessionStorage.setItem("userdata", JSON.stringify(user));
       }
-      return { token, userData: userdata, isAuth: true };
+      return { token, userData: user, isAuth: true };
     }
   }
   const value = useMemo(() => {
@@ -55,10 +53,10 @@ export function AuthProvider({ children }) {
         const localToken = localStorage.getItem("token");
         const sessionToken = sessionStorage.getItem("token");
         if (localToken) {
-          return updateToken(localToken, true);
+          return updateToken(localToken, userData, true);
         }
         if (sessionToken) {
-          return updateToken(sessionToken, false);
+          return updateToken(sessionToken, userData, false);
         }
         return { isAuth: false, token: null, userData: null };
       }
@@ -67,4 +65,3 @@ export function AuthProvider({ children }) {
   }, [token, userData, isAuth]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
-
