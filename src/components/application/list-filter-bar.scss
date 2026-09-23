@@ -1,0 +1,214 @@
+.carbon-list-filter-bar {
+  margin-bottom: 1.5rem;
+
+  .filter-bar-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.25rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+
+    .search-and-count-wrap {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex: 1;
+      max-width: 760px;
+
+      .filter-search-wrap {
+        flex: 1;
+        min-width: 280px;
+
+        .cds--search {
+          background-color: #ffffff;
+          border: 1px solid #c6c6c6;
+          border-radius: var(--app-radius-sm, 4px);
+          box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+          input {
+            background-color: #ffffff;
+            color: #161616;
+            font-size: 0.875rem;
+
+            &:focus {
+              outline: 2px solid var(--app-accent, #0f62fe);
+            }
+          }
+        }
+      }
+
+      .total-count-tag {
+        font-weight: 600;
+        font-size: 0.75rem;
+        padding: 0.25rem 0.625rem;
+      }
+    }
+
+    .filter-bar-action {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+
+  .filter-bar-bottom-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-top: 0.875rem;
+    border-top: 1px solid #e0e0e0;
+    flex-wrap: wrap;
+
+    .filter-dropdowns-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+
+      .filter-label-prefix {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #525252;
+        margin-right: 0.25rem;
+      }
+    }
+
+    .clear-all-filters-btn {
+      color: #da1e28;
+      font-size: 0.8125rem;
+
+      &:hover {
+        background-color: #fff1f1;
+      }
+    }
+  }
+
+  .filter-popover-item {
+    position: relative;
+  }
+
+  .filter-dropdown-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.3rem 0.75rem;
+    background-color: #ffffff;
+    border: 1px solid #c6c6c6;
+    border-radius: var(--app-radius-sm, 4px);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    color: #161616;
+    cursor: pointer;
+    transition: all 0.15s ease;
+
+    .selected-val-badge {
+      color: #0f62fe;
+      font-weight: 700;
+    }
+
+    &:hover {
+      background-color: #f4f4f4;
+      border-color: #8d8d8d;
+    }
+
+    &.open {
+      background-color: #edf5ff;
+      border-color: #0f62fe;
+      color: #0f62fe;
+    }
+
+    &.has-value {
+      background-color: #edf5ff;
+      border-color: #0f62fe;
+      color: #0f62fe;
+    }
+  }
+}
+
+.filter-dropdown-popover {
+  width: 260px;
+  background-color: #ffffff;
+  border: 1px solid #c6c6c6;
+  border-radius: var(--app-radius-md, 8px);
+  box-shadow: var(--app-shadow-lg);
+  padding: 0.875rem;
+  color: #161616;
+
+  .popover-filter-header {
+    margin-bottom: 0.625rem;
+
+    .popover-filter-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #525252;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+  }
+
+  .popover-filter-search {
+    margin-bottom: 0.625rem;
+  }
+
+  .popover-filter-options {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    max-height: 200px;
+    overflow-y: auto;
+
+    .no-options-found {
+      padding: 0.75rem 0.5rem;
+      font-size: 0.8125rem;
+      color: #8d8d8d;
+      text-align: center;
+    }
+
+    .filter-option-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.625rem;
+      background: transparent;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.8125rem;
+      color: #161616;
+      cursor: pointer;
+      text-align: left;
+      width: 100%;
+      transition: background-color 0.15s ease;
+
+      .option-label-text {
+        flex: 1;
+      }
+
+      .option-check-icon {
+        color: #0f62fe;
+      }
+
+      &:hover {
+        background-color: #edf5ff;
+        color: #0f62fe;
+      }
+
+      &.selected {
+        background-color: #edf5ff;
+        color: #0f62fe;
+        font-weight: 600;
+      }
+
+      .option-color-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex-shrink: 0;
+      }
+    }
+  }
+}

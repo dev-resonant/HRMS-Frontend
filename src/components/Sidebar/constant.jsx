@@ -1,48 +1,69 @@
-import { 
-  LayoutDashboard as Dashboard, 
-  Users as Employees,
-  Building2 as Departments,
-  Shield as Roles,
-  BarChart3 as AuditLogs,
-  Settings as SettingsIcon,
-  Key as PermissionsIcon
-} from "lucide-react";
+import {
+  Dashboard,
+  UserMultiple,
+  Enterprise,
+  Security,
+  Password,
+  Events,
+  Settings,
+} from "@carbon/icons-react";
 
-export const sidebarMenu = [
+export const sidebarSections = [
   {
-    label: "Dashboard",
-    icon: <Dashboard size={20} />,
-    url: "/dashboard",
+    category: "OVERVIEW",
+    items: [
+      {
+        label: "Dashboard",
+        icon: Dashboard,
+        url: "/dashboard",
+      },
+    ],
   },
   {
-    label: "Employees",
-    icon: <Employees size={20} />,
-    url: "/employees",
+    category: "ORGANIZATION",
+    items: [
+      {
+        label: "Employees",
+        icon: UserMultiple,
+        url: "/employees",
+      },
+      {
+        label: "Departments",
+        icon: Enterprise,
+        url: "/departments",
+      },
+    ],
   },
   {
-    label: "Departments",
-    icon: <Departments size={20} />,
-    url: "/departments",
+    category: "ACCESS & SECURITY",
+    items: [
+      {
+        label: "Roles",
+        icon: Security,
+        url: "/roles/list",
+        badge: "4",
+      },
+      {
+        label: "Permissions",
+        icon: Password,
+        url: "/permissions/list",
+        badge: "Matrix",
+      },
+    ],
   },
   {
-    label: "Roles",
-    icon: <Roles size={20} />,
-    url: "/roles/list",
-  },
-  {
-    label: "Permissions",
-    icon: <PermissionsIcon size={20} />,
-    url: "/permissions/list",
-  },
-  {
-    label: "Audit Logs",
-    icon: <AuditLogs size={20} />,
-    url: "/audit-logs",
-  },
-  {
-    label: "Settings",
-    icon: <SettingsIcon size={20} />,
-    url: "/settings",
+    category: "COMPLIANCE & SYSTEM",
+    items: [
+      {
+        label: "Audit Logs",
+        icon: Events,
+        url: "/audit-logs",
+      },
+      {
+        label: "Settings",
+        icon: Settings,
+        url: "/settings",
+      },
+    ],
   },
 ];
-

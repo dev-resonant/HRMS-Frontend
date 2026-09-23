@@ -1,131 +1,281 @@
-.drawer {
-  .MuiPaper-root {
-    overflow-x: hidden !important;
-    overflow-y: auto;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
+.carbon-sidebar {
+  width: 100%;
+  height: 100%;
+  background-color: #121212;
+  color: #f4f4f4;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #262626;
+  transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+  user-select: none;
 
-    // Prevent text wrapping in sidebar items
-    .MuiTypography-root,
-    .MuiListItemText-root,
-    span,
-    p {
-      white-space: nowrap;
-      text-wrap: nowrap;
-    }
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem 1.25rem;
+    min-height: 52px;
+    border-bottom: 1px solid #262626;
+    cursor: pointer;
 
-    // Smooth transition for text fade-out / fade-in
-    .MuiListItemText-root,
-    .sidebar-fade {
-      transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        max-width 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        margin 0.25s cubic-bezier(0.4, 0, 0.2, 1),
-        padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      opacity: 1;
-      max-width: 200px;
-      display: inline-block;
-      vertical-align: middle;
-    }
-
-    // Smooth animations for menu items
-    .MuiListItemButton-root {
-      transition: all 0.2s ease;
+    .brand-logo-container {
+      width: 32px;
+      height: 32px;
       border-radius: 6px;
-      margin: 0 8px;
-      margin-bottom: 2px;
+      background: linear-gradient(135deg, #0f62fe 0%, #0043ce 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
 
-      &:hover {
-        transform: translateX(2px);
+      .brand-logo {
+        color: #ffffff;
       }
+    }
 
-      &.Mui-selected {
-        position: relative;
-        background-color: rgba(255, 255, 255, 0.2) !important;
+    .brand-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
 
-        &::after {
-          content: "";
-          position: absolute;
-          left: 0;
-          top: 0;
-          bottom: 0;
-          width: 4px;
-          border-radius: 0 4px 4px 0;
+      .brand-title-row {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+
+        .brand-title {
+          font-weight: 700;
+          font-size: 1.05rem;
+          color: #ffffff;
+          letter-spacing: -0.01em;
+          white-space: nowrap;
+        }
+
+        .brand-version {
+          font-size: 0.625rem;
+          padding: 0.1rem 0.35rem;
+          border-radius: 4px;
         }
       }
-    }
 
-    // Nested menu styling
-    .MuiList-root {
-      &[component="div"] {
-        padding: 4px 0;
+      .brand-subtitle {
+        font-size: 0.625rem;
+        font-weight: 600;
+        color: #8d8d8d;
+        letter-spacing: 0.08em;
+        white-space: nowrap;
+      }
+    }
+  }
+
+  .sidebar-nav-list {
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 1rem 0.625rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+
+    .nav-section-block {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+
+      .section-header-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: #6f6f6f;
+        letter-spacing: 0.08em;
+        padding: 0 0.625rem;
+        margin-bottom: 0.25rem;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+
+      .section-items-group {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
       }
     }
 
-    // Scrollbar styling
     &::-webkit-scrollbar {
-      width: 6px;
-    }
-
-    &::-webkit-scrollbar-track {
-      background: transparent;
+      width: 4px;
     }
 
     &::-webkit-scrollbar-thumb {
-      background-color: rgba(255, 255, 255, 0.2);
-      border-radius: 3px;
+      background: #262626;
+      border-radius: 2px;
+    }
+  }
 
-      &:hover {
-        background-color: rgba(255, 255, 255, 0.3);
+  .sidebar-nav-item {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: #a8a8a8;
+    font-size: 0.84375rem;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s ease;
+    white-space: nowrap;
+    position: relative;
+
+    .nav-item-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      width: 22px;
+    }
+
+    .nav-item-label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav-item-badge {
+      font-size: 0.6875rem;
+      font-weight: 700;
+      background-color: #262626;
+      color: #c6c6c6;
+      padding: 0.1rem 0.4rem;
+      border-radius: 10px;
+    }
+
+    .nav-active-chevron {
+      color: #78a9ff;
+    }
+
+    &:hover {
+      background-color: #1f1f1f;
+      color: #ffffff;
+
+      .nav-item-icon {
+        color: #78a9ff;
+      }
+    }
+
+    &.active {
+      background-color: #262626;
+      color: #ffffff;
+      font-weight: 600;
+
+      .nav-item-icon {
+        color: #0f62fe;
+      }
+
+      .nav-item-badge {
+        background-color: #0f62fe;
+        color: #ffffff;
+      }
+
+      &::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 3px;
+        background-color: #0f62fe;
+        border-radius: 0 4px 4px 0;
+        box-shadow: 0 0 8px rgba(15, 98, 254, 0.6);
       }
     }
   }
-}
 
-// Icon animation
-.MuiListItemIcon-root {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.2s ease;
+  .sidebar-footer {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.875rem 1.25rem;
+    border-top: 1px solid #262626;
+    background-color: #0e0e0e;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
 
-  svg {
-    transition: all 0.2s ease;
-  }
-}
+    .footer-avatar {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #262626;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      color: #ffffff;
+      position: relative;
 
-// Collapse animation
-.MuiCollapse-root {
-  .MuiCollapse-wrapper {
-    .MuiCollapse-wrapperInner {
-      animation: slideDown 0.3s ease;
+      .sidebar-status-dot {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background-color: #198038;
+        border: 2px solid #0e0e0e;
+      }
+    }
+
+    .footer-info {
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+
+      .footer-name {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #ffffff;
+        white-space: nowrap;
+      }
+
+      .footer-role {
+        font-size: 0.6875rem;
+        color: #8d8d8d;
+        white-space: nowrap;
+      }
+    }
+
+    &:hover {
+      background-color: #1a1a1a;
     }
   }
-}
 
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-8px);
-  }
+  &.collapsed {
+    .sidebar-fade {
+      opacity: 0;
+      width: 0;
+      display: none;
+    }
 
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
+    .sidebar-nav-item {
+      justify-content: center;
+      padding: 0.625rem;
 
-// Fade out rules when sidebar is collapsed
-.layout.collapsed {
+      .nav-item-icon {
+        margin: 0 auto;
+      }
+    }
 
-  .MuiListItemText-root,
-  .sidebar-fade {
-    opacity: 0 !important;
-    max-width: 0 !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    overflow: hidden;
-    pointer-events: none;
+    .sidebar-brand {
+      justify-content: center;
+      padding: 0.875rem;
+    }
+
+    .sidebar-footer {
+      justify-content: center;
+      padding: 0.875rem;
+    }
   }
 }

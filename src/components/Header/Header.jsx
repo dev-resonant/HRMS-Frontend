@@ -1,356 +1,306 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
-  Menu,
-  MenuItem,
-  Divider,
-  ListItemIcon,
-  Box,
-  Typography,
-  AppBar,
-  Toolbar,
-  Avatar,
-  IconButton,
-  InputBase,
-  Badge,
-  Tooltip,
-} from "@mui/material";
-
-import "./header.scss";
+  Search,
+  Popover,
+  PopoverContent,
+  Tag,
+  Button,
+} from "@carbon/react";
+import {
+  Notification,
+  Settings,
+  Logout,
+  Menu as MenuIcon,
+  Checkmark,
+  User,
+  Help,
+  ChevronDown,
+} from "@carbon/icons-react";
 import { useNavigate } from "react-router";
 import { useAuthContext } from "../../context/AuthContext/AuthContextExport";
-import { 
-  User, 
-  Info as Information, 
-  Moon as Asleep, 
-  LogOut as Logout, 
-  BookOpen as Wikis,
-  Search as SearchIcon,
-  Bell as BellIcon,
-  Settings as SettingsIcon,
-  Building2 as LogoIcon,
-} from "lucide-react";
-
-const CarbonIcons = {
-  User,
-  Information,
-  Asleep,
-  Logout,
-  Wikis,
-  SearchIcon,
-  BellIcon,
-  SettingsIcon,
-};
-
-const IconMapper = ({ name, size = 18 }) => {
-  const IconComp = CarbonIcons[name];
-  return IconComp ? <IconComp size={size} /> : null;
-};
+import "./header.scss";
 
 export const Header = ({ onToggleSidebar }) => {
   const navigate = useNavigate();
   const { getData } = useAuthContext();
   const user = getData();
-  const [anchorEl, setAnchorEl] = useState(null);
+
   const [searchValue, setSearchValue] = useState("");
-  const [notificationAnchor, setNotificationAnchor] = useState(null);
+  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [notificationTab, setNotificationTab] = useState("all");
 
-  const open = Boolean(anchorEl);
-  const notificationOpen = Boolean(notificationAnchor);
+  const [notifications, setNotifications] = useState([
+    {
+      id: "1",
+      title: "New Leave Application",
+      description: "Sarah Connor requested 3 days of Annual Leave",
+      time: "5m ago",
+      category: "requests",
+      unread: true,
+    },
+    {
+      id: "2",
+      title: "Security Permission Modified",
+      description: "Scope changed for HR Admin in Leave module",
+      time: "1h ago",
+      category: "system",
+      unread: true,
+    },
+    {
+      id: "3",
+      title: "Monthly Payroll Auto-Generated",
+      description: "Payroll batch for August is ready for audit approval",
+      time: "4h ago",
+      category: "system",
+      unread: false,
+    },
+  ]);
 
-  const handleOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  const notificationBtnRef = useRef(null);
+  const userBtnRef = useRef(null);
 
-  const handleClose = () => {
-    setAnchorEl(null);
-  };
-
-  const handleNotificationOpen = (event) => {
-    setNotificationAnchor(event.currentTarget);
-  };
-
-  const handleNotificationClose = () => {
-    setNotificationAnchor(null);
-  };
-
-  // Handle item click
-  const onMenuItemClick = (action) => {
-    console.log("Clicked:", action);
-
-    if (action === "Logout") {
-      navigate("/logout");
-    }
-    if (action === "profile") {
-      navigate("/profile");
-    }
-
-    handleClose();
-  };
-
-  const userName = user?.userData?.name || "User";
+  const userName = user?.userData?.name || user?.userData?.user_name || "Het";
+  const userRole = user?.userData?.role === "admin" ? "Administrator" : "Employee";
+  const userEmail = user?.userData?.email || "het@gmail.com";
   const userInitial = userName.charAt(0).toUpperCase();
 
+  const unreadCount = notifications.filter((n) => n.unread).length;
+
+  const markAllRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  };
+
+  const handleLogout = () => {
+    setIsUserMenuOpen(false);
+    navigate("/logout");
+  };
+
+  const filteredNotifications =
+    notificationTab === "all"
+      ? notifications
+      : notifications.filter((n) => n.category === notificationTab);
+
   return (
-    <AppBar 
-      position="static" 
-      className="custom-header"
-      sx={{
-        backgroundColor: "#fff",
-        color: "#333",
-        boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        borderBottom: "1px solid #e0e0e0",
-      }}
-    >
-      <Toolbar
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          minHeight: 64,
-          px: 3,
-          gap: 3,
-        }}
-      >
-        {/* Left Section - Logo and Search */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2, flex: 1, minWidth: 0 }}>
-          {/* Logo */}
-          <Tooltip title="Toggle Sidebar">
-            <Box
-              onClick={onToggleSidebar}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                width: 40,
-                height: 40,
-                borderRadius: "50%",
-                backgroundColor: "#3F4B8D",
-                color: "#fff",
-                flexShrink: 0,
-                cursor: "pointer",
-                transition: "transform 0.2s ease, background-color 0.2s ease",
-                "&:hover": {
-                  backgroundColor: "#2e3a75",
-                  transform: "scale(1.05)",
-                },
-                "&:active": {
-                  transform: "scale(0.95)",
-                },
-              }}
-            >
-              <LogoIcon size={22} />
-            </Box>
-          </Tooltip>
+    <header className="app-top-header" aria-label="ProHRM Platform Header">
+      {/* Left: Sidebar Toggle & Search */}
+      <div className="header-left-section">
+        <button
+          type="button"
+          aria-label="Toggle Sidebar"
+          className="header-icon-btn toggle-sidebar-btn"
+          onClick={onToggleSidebar}
+        >
+          <MenuIcon size={20} />
+        </button>
 
-          {/* Search */}
-          <Box
-            className="header-search"
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "#f5f5f5",
-              borderRadius: "6px",
-              px: 2,
-              py: 1,
-              width: "250px",
-              gap: 1,
-              transition: "all 0.2s ease",
-              "&:hover": {
-                backgroundColor: "#efefef",
-              },
-              "&:focus-within": {
-                boxShadow: "0 2px 8px rgba(63, 75, 141, 0.2)",
-              },
-            }}
+        <div className="header-search-wrap">
+          <Search
+            size="sm"
+            id="app-header-search"
+            placeholder="Search anything (e.g. employees, permissions, payroll)..."
+            labelText="Search"
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+            onClear={() => setSearchValue("")}
+          />
+          <span className="search-kbd-tag">Ctrl + K</span>
+        </div>
+      </div>
+
+      {/* Right: Global Actions & User Profile */}
+      <div className="header-right-section">
+        <button
+          type="button"
+          aria-label="Help Center"
+          onClick={() => window.open("https://carbondesignsystem.com", "_blank")}
+          className="header-icon-btn"
+        >
+          <Help size={20} />
+        </button>
+
+        {/* Notifications Popover */}
+        <div className="header-popover-anchor">
+          <Popover
+            open={isNotificationOpen}
+            align="bottom-right"
+            onRequestClose={() => setIsNotificationOpen(false)}
           >
-            <SearchIcon size={16} color="#999" />
-            <InputBase
-              placeholder="Search..."
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-              sx={{
-                flex: 1,
-                fontSize: "0.85rem",
-                "& input::placeholder": {
-                  color: "#999",
-                  opacity: 1,
-                },
-              }}
-            />
-          </Box>
-        </Box>
-
-        {/* Right Section - Actions */}
-        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
-          {/* Notifications */}
-          <Tooltip title="Notifications">
-            <IconButton
-              onClick={handleNotificationOpen}
-              sx={{
-                color: "#666",
-                size: "small",
-                "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                },
+            <button
+              ref={notificationBtnRef}
+              type="button"
+              aria-label="Notifications"
+              className={`header-icon-btn ${isNotificationOpen ? "active" : ""}`}
+              onClick={() => {
+                setIsNotificationOpen((prev) => !prev);
+                setIsUserMenuOpen(false);
               }}
             >
-              <Badge badgeContent={3} color="error">
-                <BellIcon size={20} />
-              </Badge>
-            </IconButton>
-          </Tooltip>
+              <Notification size={20} />
+              {unreadCount > 0 && (
+                <span className="header-badge-count">{unreadCount}</span>
+              )}
+            </button>
 
-          {/* Notifications Menu */}
-          <Menu
-            anchorEl={notificationAnchor}
-            open={notificationOpen}
-            onClose={handleNotificationClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-            PaperProps={{
-              sx: {
-                width: 300,
-                maxHeight: 400,
-                mt: 1,
-              },
-            }}
+            <PopoverContent className="notifications-popover-content">
+              <div className="popover-header">
+                <div className="title-row">
+                  <h6>Notifications</h6>
+                  {unreadCount > 0 && (
+                    <Tag type="blue" size="sm">
+                      {unreadCount} unread
+                    </Tag>
+                  )}
+                </div>
+                {unreadCount > 0 && (
+                  <button
+                    type="button"
+                    className="mark-all-read-btn"
+                    onClick={markAllRead}
+                  >
+                    <Checkmark size={14} /> Mark all read
+                  </button>
+                )}
+              </div>
+
+              <div className="notifications-tab-bar">
+                <button
+                  type="button"
+                  className={`tab-btn ${notificationTab === "all" ? "active" : ""}`}
+                  onClick={() => setNotificationTab("all")}
+                >
+                  All ({notifications.length})
+                </button>
+                <button
+                  type="button"
+                  className={`tab-btn ${notificationTab === "requests" ? "active" : ""}`}
+                  onClick={() => setNotificationTab("requests")}
+                >
+                  Requests
+                </button>
+                <button
+                  type="button"
+                  className={`tab-btn ${notificationTab === "system" ? "active" : ""}`}
+                  onClick={() => setNotificationTab("system")}
+                >
+                  System
+                </button>
+              </div>
+
+              <div className="notifications-list">
+                {filteredNotifications.length === 0 ? (
+                  <div className="no-notifications">No notifications to display</div>
+                ) : (
+                  filteredNotifications.map((notif) => (
+                    <div
+                      key={notif.id}
+                      className={`notification-item ${notif.unread ? "unread" : ""}`}
+                    >
+                      {notif.unread && <div className="unread-dot" />}
+                      <div className="notif-content">
+                        <div className="notif-title">{notif.title}</div>
+                        <div className="notif-desc">{notif.description}</div>
+                        <div className="notif-time">{notif.time}</div>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+
+        {/* Settings Button */}
+        <button
+          type="button"
+          aria-label="Settings"
+          onClick={() => navigate("/settings")}
+          className="header-icon-btn"
+        >
+          <Settings size={20} />
+        </button>
+
+        {/* User Profile Popover */}
+        <div className="header-popover-anchor">
+          <Popover
+            open={isUserMenuOpen}
+            align="bottom-right"
+            onRequestClose={() => setIsUserMenuOpen(false)}
           >
-            <MenuItem disabled sx={{ pb: 1 }}>
-              <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-                Notifications
-              </Typography>
-            </MenuItem>
-            <Divider />
-            <MenuItem>
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  New Leave Request
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  5 minutes ago
-                </Typography>
-              </Box>
-            </MenuItem>
-            <MenuItem>
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  System Update
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  2 hours ago
-                </Typography>
-              </Box>
-            </MenuItem>
-            <MenuItem>
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                  New Employee Added
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  1 day ago
-                </Typography>
-              </Box>
-            </MenuItem>
-          </Menu>
-
-          {/* Settings */}
-          <Tooltip title="Settings">
-            <IconButton
-              sx={{
-                color: "#666",
-                size: "small",
-                "&:hover": {
-                  backgroundColor: "rgba(0, 0, 0, 0.05)",
-                },
+            <button
+              ref={userBtnRef}
+              type="button"
+              aria-label="User Profile"
+              className={`user-profile-btn ${isUserMenuOpen ? "active" : ""}`}
+              onClick={() => {
+                setIsUserMenuOpen((prev) => !prev);
+                setIsNotificationOpen(false);
               }}
             >
-              <SettingsIcon size={20} />
-            </IconButton>
-          </Tooltip>
-
-          <Divider orientation="vertical" flexItem sx={{ my: 1.5, mx: 0.5 }} />
-
-          {/* User Avatar and Menu */}
-          <Tooltip title="User Menu">
-            <IconButton
-              onClick={handleOpen}
-              sx={{
-                p: 0.5,
-                "&:hover": {
-                  opacity: 0.8,
-                },
-              }}
-            >
-              <Avatar
-                sx={{
-                  bgcolor: "#3F4B8D",
-                  color: "#fff",
-                  width: 40,
-                  height: 40,
-                  fontSize: "0.95rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
+              <div className="user-avatar">
                 {userInitial}
-              </Avatar>
-            </IconButton>
-          </Tooltip>
+                <span className="online-dot" />
+              </div>
+              <ChevronDown size={14} className="user-arrow" />
+            </button>
 
-          {/* User Menu */}
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-            transformOrigin={{ vertical: "top", horizontal: "right" }}
-            PaperProps={{
-              sx: {
-                width: 240,
-                mt: 1,
-              },
-            }}
-          >
-            <MenuItem disabled sx={{ pb: 1 }}>
-              <Box>
-                <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                  {userName}
-                </Typography>
-                <Typography variant="caption" color="textSecondary">
-                  {user?.userData?.role || "Administrator"}
-                </Typography>
-              </Box>
-            </MenuItem>
-            <Divider />
-            <MenuItem
-              onClick={() => onMenuItemClick("Logout")}
-              sx={{
-                display: "flex",
-                alignItems: "center",
-                gap: 1.5,
-                fontSize: "0.9rem",
-                "&:hover": {
-                  backgroundColor: "#f5f5f5",
-                },
-              }}
-            >
-              <ListItemIcon
-                sx={{
-                  minWidth: 0,
-                  color: "inherit",
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <Logout size={18} />
-              </ListItemIcon>
-              <Typography sx={{ fontSize: "0.9rem" }}>
-                Logout
-              </Typography>
-            </MenuItem>
-          </Menu>
-        </Box>
-      </Toolbar>
-    </AppBar>
+            <PopoverContent className="user-menu-popover-content">
+              <div className="user-info-section">
+                <div className="user-avatar-large">
+                  {userInitial}
+                  <span className="avatar-online-dot" />
+                </div>
+                <div className="user-meta">
+                  <div className="user-name">{userName}</div>
+                  <div className="user-email">{userEmail}</div>
+                  <Tag type="blue" size="sm" className="role-tag">
+                    {userRole}
+                  </Tag>
+                </div>
+              </div>
+
+              <div className="user-menu-divider" />
+
+              <div className="user-quick-links">
+                <button
+                  type="button"
+                  className="menu-link-btn"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate("/profile");
+                  }}
+                >
+                  <User size={16} /> My Profile & Preferences
+                </button>
+                <button
+                  type="button"
+                  className="menu-link-btn"
+                  onClick={() => {
+                    setIsUserMenuOpen(false);
+                    navigate("/settings");
+                  }}
+                >
+                  <Settings size={16} /> Workspace Settings
+                </button>
+              </div>
+
+              <div className="user-menu-divider" />
+
+              <div className="user-menu-actions">
+                <Button
+                  kind="danger--ghost"
+                  size="sm"
+                  renderIcon={Logout}
+                  onClick={handleLogout}
+                  className="user-logout-btn"
+                >
+                  Sign Out
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        </div>
+      </div>
+    </header>
   );
 };

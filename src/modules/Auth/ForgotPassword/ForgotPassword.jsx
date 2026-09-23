@@ -1,33 +1,40 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router";
 import { Controller, useForm } from "react-hook-form";
+import {
+  TextInput,
+  Button,
+  InlineNotification,
+  InlineLoading,
+  Heading,
+  Stack,
+} from "@carbon/react";
+import { ArrowLeft, Login, Enterprise, Send, Renew } from "@carbon/icons-react";
 import { REGEX_EMAIL } from "../../../lib/validation-regex";
 import { useForgotPassword } from "./forgot-password-api";
-import { ArrowLeft, LogIn } from "lucide-react";
 import "./forgot-password.scss";
-import {
-  Button,
-  TextField,
-  Typography,
-  Box,
-} from "@mui/material";
 
 const defaultInput = {
-  email: "",
+  email: "het@gmail.com",
 };
 
 export function ForgotPassword({ defaultValues = defaultInput }) {
   const location = useLocation();
   const [isSent, setIsSent] = useState(false);
-  if (location.state?.formdata) defaultValues = { ...defaultValues, ...location.state.formdata };
+
+  if (location.state?.formdata) {
+    defaultValues = { ...defaultValues, ...location.state.formdata };
+  }
+
   const {
     control,
     handleSubmit,
     setError,
     watch,
-    formState: { errors },
-  } = useForm({ defaultValues: defaultValues });
+  } = useForm({ defaultValues });
+
   const forgotSubmit = useForgotPassword();
+  const isLoading = forgotSubmit.isPending;
 
   const submit = (inputs) => {
     const form_data = new FormData();
@@ -37,80 +44,95 @@ export function ForgotPassword({ defaultValues = defaultInput }) {
     forgotSubmit.mutate(form_data, {
       onSuccess: () => setIsSent(true),
       onError: (axiosError) => {
-        setError("root.serverError", { message: axiosError.response.data.message, type: axiosError.response.status });
+        setError("root.serverError", {
+          message: axiosError.response?.data?.message || "Failed to send reset link",
+          type: axiosError.response?.status,
+        });
       },
     });
   };
 
   return (
-    <div className="forgot-password-page gradient-bg">
-      <div className="forgot-password-container">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Forgot Password
-        </Typography>
-        <div className="forgot-password-content">
-          {isSent ? (
-            <Box>
-              <Typography variant="body1" sx={{ mb: 2 }}>
-                Password reset link has been sent to your email: {watch("email")}.
-                <br />
-                The Link will expire in 24 Hr.
-              </Typography>
-              <Link to="/Login" className="login-link">
-                <LogIn color="primary" size={16} /> Click Here to Login
-              </Link>
-            </Box>
-          ) : (
-            <>
-              <img src="/images/norquest_newlogo.png" alt="" />
-              <form noValidate onSubmit={handleSubmit(submit)} style={{ marginTop: "1rem" }}>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-                  Enter your email address for the verification process. We Will send you a link to change your password
-                  to the email provided
-                </Typography>
-
-                <Controller
-                  name="email"
-                  control={control}
-                  rules={{
-                    required: "Email required",
-                    pattern: { value: REGEX_EMAIL, message: "Invalid email" },
-                  }}
-                  render={({ field, fieldState: { error } }) => (
-                    <TextField
-                      {...field}
-                      placeholder="Enter email"
-                      label="Email"
-                      autoComplete="username"
-                      error={!!error}
-                      type="email"
-                      fullWidth
-                      helperText={error?.message}
-                    />
-                  )}
-                />
-                {errors?.root?.serverError && (
-                  <Typography color="error" variant="caption" sx={{ mt: 2 }}>
-                    {errors.root.serverError.message}
-                  </Typography>
-                )}
-              </form>
-            </>
-          )}
+    <div className="simple-auth-page">
+      <div className="simple-forgot-container animate-fade-in">
+        <div className="simple-auth-header">
+          <div className="brand-badge">
+            <Enterprise size={24} />
+          </div>
+          <Heading className="brand-title">Forgot Password</Heading>
+          <p className="brand-tagline">Enter your work email to reset</p>
         </div>
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 2, p: 2, alignItems: "stretch" }}>
-          {!isSent && (
-            <>
-              <Button variant="contained" onClick={handleSubmit(submit)} fullWidth>
-                Send Reset Link
+
+        {isSent ? (
+          <div className="reset-feedback-block">
+            <InlineNotification
+              kind="success"
+              title="Reset link sent"
+              subtitle={`Check ${watch("email")} for instructions.`}
+              hideCloseButton
+            />
+            <Button
+              kind="ghost"
+              size="md"
+              renderIcon={Renew}
+              onClick={handleSubmit(submit)}
+              disabled={isLoading}
+              style={{ width: "100%", marginTop: "0.5rem" }}
+            >
+              Resend Link
+            </Button>
+            <Link to="/login" style={{ display: "block", marginTop: "1rem" }}>
+              <Button kind="primary" renderIcon={Login} size="lg" style={{ width: "100%" }}>
+                Back to Sign In
               </Button>
-              <Link to={{ pathname: "/login" }} className="login-link" style={{ textAlign: "center" }}>
-                <ArrowLeft color="#1c57e4" size={16} />
-                Back to Login
-              </Link>
-            </>
-          )}
-        </Box>
+            </Link>
+          </div>
+        ) : (
+          <form noValidate onSubmit={handleSubmit(submit)} className="simple-forgot-form">
+            <Stack gap={4}>
+              <Controller
+                name="email"
+                control={control}
+                rules={{
+                  required: "Email is required",
+                  pattern: { value: REGEX_EMAIL, message: "Enter a valid email" },
+                }}
+                render={({ field, fieldState: { error } }) => (
+                  <TextInput
+                    id="forgot-email"
+                    labelText="Email Address"
+                    placeholder="het@gmail.com"
+                    type="email"
+                    required
+                    invalid={!!error}
+                    invalidText={error?.message}
+                    {...field}
+                  />
+                )}
+              />
+
+              <Button
+                type="submit"
+                size="lg"
+                className="submit-btn"
+                disabled={isLoading}
+                renderIcon={isLoading ? null : Send}
+              >
+                {isLoading ? (
+                  <InlineLoading status="active" description="Sending..." />
+                ) : (
+                  "Send Reset Link"
+                )}
+              </Button>
+
+              <div className="back-link-row">
+                <Link to="/login" className="back-link">
+                  <ArrowLeft size={16} /> Back to Sign In
+                </Link>
+              </div>
+            </Stack>
+          </form>
+        )}
       </div>
     </div>
   );

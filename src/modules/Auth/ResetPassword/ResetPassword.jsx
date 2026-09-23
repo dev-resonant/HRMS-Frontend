@@ -1,17 +1,16 @@
-import { useForm } from "react-hook-form";
-import { useResetPassword } from "./reset-password-api";
-import { useSearchParams } from "react-router";
-import "./reset-password.scss";
-import { Eye, EyeOff } from "lucide-react";
-import { useState } from "react";
+import { useForm, Controller } from "react-hook-form";
+import { useSearchParams, useNavigate, Link } from "react-router";
 import {
+  PasswordInput,
   Button,
-  TextField,
-  IconButton,
-  InputAdornment,
-  Typography,
-  Box,
-} from "@mui/material";
+  InlineNotification,
+  InlineLoading,
+  Heading,
+  Stack,
+} from "@carbon/react";
+import { ArrowRight, Enterprise, Checkmark, Subtract } from "@carbon/icons-react";
+import { useResetPassword } from "./reset-password-api";
+import "./reset-password.scss";
 
 const defaultInput = {
   password: "",
@@ -20,16 +19,25 @@ const defaultInput = {
 
 export function ResetPassword() {
   const [searchParams] = useSearchParams();
-  const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const navigate = useNavigate();
   const token = searchParams.get("token");
   const reset = useResetPassword(token);
+  const isLoading = reset.isPending;
+
   const {
     handleSubmit,
-    register,
+    control,
+    watch,
     setError,
     formState: { errors },
   } = useForm({ defaultValues: defaultInput });
+
+  const passwordVal = watch("password") || "";
+
+  const rules = [
+    { label: "At least 8 characters", valid: passwordVal.length >= 8 },
+    { label: "At least one number or special char", valid: /[\d!@#$%^&*()]/.test(passwordVal) },
+  ];
 
   const submit = (inputs) => {
     const form_data = new FormData();
@@ -38,107 +46,116 @@ export function ResetPassword() {
     }
     form_data.append("token", token);
     reset.mutate(form_data, {
+      onSuccess: () => {
+        navigate("/login");
+      },
       onError: (axiosError) => {
-        setError("root.serverError", { message: axiosError.response.data.message, type: axiosError.response.status });
+        setError("root.serverError", {
+          message: axiosError.response?.data?.message || "Password reset failed.",
+          type: axiosError.response?.status,
+        });
       },
     });
   };
 
   return (
-    <div className="reset-password-page gradient-bg">
-      <div className="reset-password-container">
-        <Typography variant="h4" component="h1" gutterBottom>
-          Reset Password
-        </Typography>
-        <div className="reset-password-content">
-          <img src="/images/norquest_newlogo.png" alt="" />
-          <form noValidate onSubmit={handleSubmit(submit)} className="reset-password-form">
-            <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-              Enter a new Password below to change your password
-            </Typography>
-
-            <TextField
-              required
-              id="password"
-              label="New Password"
-              autoFocus
-              type={showPassword ? "text" : "password"}
-              error={Boolean(errors.password)}
-              autoComplete="new-password"
-              fullWidth
-              sx={{ mb: 3 }}
-              {...register("password", {
-                required: "Password is Required",
-                min: { value: 8, message: "Password should not be less than 8 character" },
-                max: { value: 15, message: "Password should not be more than 15 character" },
-                validate: {
-                  isValidPassword: (value) => {
-                    if (!/[A-Za-z]/.test(value)) return "Password must contain atleast one alphabet character";
-                    if (!/\d+/.test(value)) return "Password must contain atleast one numeric character";
-                    if (!/[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/.test(value))
-                      return "Password must contain atleast one special character";
-                  },
-                },
-              })}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowPassword((p) => !p)} edge="end">
-                        {showPassword ? <EyeOff /> : <Eye />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              helperText={errors.password?.message}
-            />
-
-            <TextField
-              required
-              id="confirm-password"
-              label="Confirm Password"
-              type={showConfirmPassword ? "text" : "password"}
-              error={Boolean(errors.confirm_password)}
-              autoComplete="new-password"
-              fullWidth
-              {...register("confirm_password", {
-                required: "Confirm Password is Required",
-                validate: {
-                  isEqual: (value, formValues) => {
-                    if (value === formValues.password) {
-                      return true;
-                    } else {
-                      return "Confirm password does not match";
-                    }
-                  },
-                },
-              })}
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton onClick={() => setShowConfirmPassword((p) => !p)} edge="end">
-                        {showConfirmPassword ? <EyeOff /> : <Eye />}
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                },
-              }}
-              helperText={errors.confirm_password?.message}
-            />
-            {errors?.root?.serverError && (
-              <Typography color="error" variant="caption" sx={{ mt: 2 }}>
-                {errors.root.serverError.message}
-              </Typography>
-            )}
-            </form>
+    <div className="simple-auth-page">
+      <div className="simple-reset-container animate-fade-in">
+        <div className="simple-auth-header">
+          <div className="brand-badge">
+            <Enterprise size={24} />
+          </div>
+          <Heading className="brand-title">New Password</Heading>
+          <p className="brand-tagline">Set your new password</p>
         </div>
-        <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
-          <Button variant="contained" onClick={handleSubmit(submit)}>
-            Continue
-          </Button>
-        </Box>
+
+        <form noValidate onSubmit={handleSubmit(submit)} className="simple-reset-form">
+          <Stack gap={4}>
+            <Controller
+              name="password"
+              control={control}
+              rules={{
+                required: "Password is required",
+                minLength: { value: 8, message: "Must be at least 8 characters" },
+              }}
+              render={({ field, fieldState: { error } }) => (
+                <PasswordInput
+                  id="reset-password"
+                  labelText="New Password"
+                  placeholder="Enter new password"
+                  required
+                  invalid={!!error}
+                  invalidText={error?.message}
+                  {...field}
+                />
+              )}
+            />
+
+            {/* Simple Dynamic Requirements */}
+            <div className="simple-checklist">
+              {rules.map((r, idx) => (
+                <div key={idx} className={`checklist-item ${r.valid ? "passed" : ""}`}>
+                  {r.valid ? (
+                    <Checkmark size={12} className="check-icon success" />
+                  ) : (
+                    <Subtract size={12} className="check-icon neutral" />
+                  )}
+                  <span>{r.label}</span>
+                </div>
+              ))}
+            </div>
+
+            <Controller
+              name="confirm_password"
+              control={control}
+              rules={{
+                required: "Please confirm your password",
+                validate: (value) =>
+                  value === watch("password") || "Passwords do not match",
+              }}
+              render={({ field, fieldState: { error } }) => (
+                <PasswordInput
+                  id="reset-confirm-password"
+                  labelText="Confirm Password"
+                  placeholder="Repeat new password"
+                  required
+                  invalid={!!error}
+                  invalidText={error?.message}
+                  {...field}
+                />
+              )}
+            />
+
+            {errors?.root?.serverError && (
+              <InlineNotification
+                kind="error"
+                title="Failed"
+                subtitle={errors.root.serverError.message}
+                hideCloseButton
+              />
+            )}
+
+            <Button
+              type="submit"
+              size="lg"
+              className="submit-btn"
+              disabled={isLoading}
+              renderIcon={isLoading ? null : ArrowRight}
+            >
+              {isLoading ? (
+                <InlineLoading status="active" description="Saving..." />
+              ) : (
+                "Update Password"
+              )}
+            </Button>
+
+            <div className="back-link-row">
+              <Link to="/login" className="back-link">
+                Back to Sign In
+              </Link>
+            </div>
+          </Stack>
+        </form>
       </div>
     </div>
   );
