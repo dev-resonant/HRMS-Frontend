@@ -1,306 +1,130 @@
-import { useState, useRef } from "react";
-import {
-  Search,
-  Popover,
-  PopoverContent,
-  Tag,
-  Button,
-} from "@carbon/react";
-import {
-  Notification,
-  Settings,
-  Logout,
-  Menu as MenuIcon,
-  Checkmark,
-  User,
-  Help,
-  ChevronDown,
-} from "@carbon/icons-react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
+import {
+  Avatar,
+  Box,
+  Button,
+  Chip,
+  Divider,
+  IconButton,
+  InputAdornment,
+  Popover,
+  TextField,
+  Typography,
+} from "@mui/material";
+import MenuIcon from "@mui/icons-material/Menu";
+import SearchIcon from "@mui/icons-material/Search";
+import SettingsOutlined from "@mui/icons-material/SettingsOutlined";
+import LogoutOutlined from "@mui/icons-material/LogoutOutlined";
+import LockOutlined from "@mui/icons-material/LockOutlined";
+import ExpandMore from "@mui/icons-material/ExpandMore";
+import { useTheme } from "@mui/material/styles";
 import { useAuthContext } from "../../context/AuthContext/AuthContextExport";
-import "./header.scss";
 
 export const Header = ({ onToggleSidebar }) => {
+  const brand = useTheme().palette.brand;
   const navigate = useNavigate();
   const { getData } = useAuthContext();
   const user = getData();
 
   const [searchValue, setSearchValue] = useState("");
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false);
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
-  const [notificationTab, setNotificationTab] = useState("all");
+  const [userAnchor, setUserAnchor] = useState(null);
 
-  const [notifications, setNotifications] = useState([
-    {
-      id: "1",
-      title: "New Leave Application",
-      description: "Sarah Connor requested 3 days of Annual Leave",
-      time: "5m ago",
-      category: "requests",
-      unread: true,
-    },
-    {
-      id: "2",
-      title: "Security Permission Modified",
-      description: "Scope changed for HR Admin in Leave module",
-      time: "1h ago",
-      category: "system",
-      unread: true,
-    },
-    {
-      id: "3",
-      title: "Monthly Payroll Auto-Generated",
-      description: "Payroll batch for August is ready for audit approval",
-      time: "4h ago",
-      category: "system",
-      unread: false,
-    },
-  ]);
-
-  const notificationBtnRef = useRef(null);
-  const userBtnRef = useRef(null);
-
-  const userName = user?.userData?.name || user?.userData?.user_name || "Het";
-  const userRole = user?.userData?.role === "admin" ? "Administrator" : "Employee";
-  const userEmail = user?.userData?.email || "het@gmail.com";
+  const data = user?.userData;
+  const userName = data?.name || data?.user_name || "User";
+  const userRole = data?.roleDisplayName || data?.role || "Employee";
+  const userEmail = data?.email || "";
   const userInitial = userName.charAt(0).toUpperCase();
 
-  const unreadCount = notifications.filter((n) => n.unread).length;
-
-  const markAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, unread: false })));
+  const go = (path) => {
+    setUserAnchor(null);
+    navigate(path);
   };
-
-  const handleLogout = () => {
-    setIsUserMenuOpen(false);
-    navigate("/logout");
-  };
-
-  const filteredNotifications =
-    notificationTab === "all"
-      ? notifications
-      : notifications.filter((n) => n.category === notificationTab);
 
   return (
-    <header className="app-top-header" aria-label="ProHRM Platform Header">
-      {/* Left: Sidebar Toggle & Search */}
-      <div className="header-left-section">
-        <button
-          type="button"
-          aria-label="Toggle Sidebar"
-          className="header-icon-btn toggle-sidebar-btn"
-          onClick={onToggleSidebar}
-        >
-          <MenuIcon size={20} />
-        </button>
+    <Box
+      component="header"
+      aria-label="ProHRM header"
+      sx={{
+        height: 64,
+        px: { xs: 1.5, md: 3 },
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 2,
+        bgcolor: "#fff",
+        borderBottom: "1px solid",
+        borderColor: "divider",
+        boxShadow: "0 1px 12px rgba(0,0,0,0.03)",
+        flexShrink: 0,
+      }}
+    >
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, flex: 1, minWidth: 0 }}>
+        <IconButton aria-label="Toggle sidebar" onClick={onToggleSidebar}>
+          <MenuIcon />
+        </IconButton>
+        <TextField
+          size="small"
+          placeholder="Search anything (employees, leave, shifts)…"
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          sx={{ maxWidth: 440, display: { xs: "none", sm: "block" }, "& .MuiOutlinedInput-root": { bgcolor: brand.bg } }}
+          slotProps={{
+            htmlInput: { "aria-label": "Search" },
+            input: {
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon fontSize="small" />
+                </InputAdornment>
+              ),
+            },
+          }}
+        />
+      </Box>
 
-        <div className="header-search-wrap">
-          <Search
-            size="sm"
-            id="app-header-search"
-            placeholder="Search anything (e.g. employees, permissions, payroll)..."
-            labelText="Search"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onClear={() => setSearchValue("")}
-          />
-          <span className="search-kbd-tag">Ctrl + K</span>
-        </div>
-      </div>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+        <IconButton aria-label="Settings" onClick={() => navigate("/settings")}>
+          <SettingsOutlined />
+        </IconButton>
+        <Button color="inherit" onClick={(e) => setUserAnchor(e.currentTarget)} aria-label="User profile" sx={{ minWidth: 0, px: 0.75, borderRadius: 6 }}>
+          <Avatar sx={{ width: 32, height: 32, bgcolor: brand.primary, fontSize: "0.85rem" }}>{userInitial}</Avatar>
+          <ExpandMore fontSize="small" />
+        </Button>
+      </Box>
 
-      {/* Right: Global Actions & User Profile */}
-      <div className="header-right-section">
-        <button
-          type="button"
-          aria-label="Help Center"
-          onClick={() => window.open("https://carbondesignsystem.com", "_blank")}
-          className="header-icon-btn"
-        >
-          <Help size={20} />
-        </button>
-
-        {/* Notifications Popover */}
-        <div className="header-popover-anchor">
-          <Popover
-            open={isNotificationOpen}
-            align="bottom-right"
-            onRequestClose={() => setIsNotificationOpen(false)}
-          >
-            <button
-              ref={notificationBtnRef}
-              type="button"
-              aria-label="Notifications"
-              className={`header-icon-btn ${isNotificationOpen ? "active" : ""}`}
-              onClick={() => {
-                setIsNotificationOpen((prev) => !prev);
-                setIsUserMenuOpen(false);
-              }}
-            >
-              <Notification size={20} />
-              {unreadCount > 0 && (
-                <span className="header-badge-count">{unreadCount}</span>
-              )}
-            </button>
-
-            <PopoverContent className="notifications-popover-content">
-              <div className="popover-header">
-                <div className="title-row">
-                  <h6>Notifications</h6>
-                  {unreadCount > 0 && (
-                    <Tag type="blue" size="sm">
-                      {unreadCount} unread
-                    </Tag>
-                  )}
-                </div>
-                {unreadCount > 0 && (
-                  <button
-                    type="button"
-                    className="mark-all-read-btn"
-                    onClick={markAllRead}
-                  >
-                    <Checkmark size={14} /> Mark all read
-                  </button>
-                )}
-              </div>
-
-              <div className="notifications-tab-bar">
-                <button
-                  type="button"
-                  className={`tab-btn ${notificationTab === "all" ? "active" : ""}`}
-                  onClick={() => setNotificationTab("all")}
-                >
-                  All ({notifications.length})
-                </button>
-                <button
-                  type="button"
-                  className={`tab-btn ${notificationTab === "requests" ? "active" : ""}`}
-                  onClick={() => setNotificationTab("requests")}
-                >
-                  Requests
-                </button>
-                <button
-                  type="button"
-                  className={`tab-btn ${notificationTab === "system" ? "active" : ""}`}
-                  onClick={() => setNotificationTab("system")}
-                >
-                  System
-                </button>
-              </div>
-
-              <div className="notifications-list">
-                {filteredNotifications.length === 0 ? (
-                  <div className="no-notifications">No notifications to display</div>
-                ) : (
-                  filteredNotifications.map((notif) => (
-                    <div
-                      key={notif.id}
-                      className={`notification-item ${notif.unread ? "unread" : ""}`}
-                    >
-                      {notif.unread && <div className="unread-dot" />}
-                      <div className="notif-content">
-                        <div className="notif-title">{notif.title}</div>
-                        <div className="notif-desc">{notif.description}</div>
-                        <div className="notif-time">{notif.time}</div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-
-        {/* Settings Button */}
-        <button
-          type="button"
-          aria-label="Settings"
-          onClick={() => navigate("/settings")}
-          className="header-icon-btn"
-        >
-          <Settings size={20} />
-        </button>
-
-        {/* User Profile Popover */}
-        <div className="header-popover-anchor">
-          <Popover
-            open={isUserMenuOpen}
-            align="bottom-right"
-            onRequestClose={() => setIsUserMenuOpen(false)}
-          >
-            <button
-              ref={userBtnRef}
-              type="button"
-              aria-label="User Profile"
-              className={`user-profile-btn ${isUserMenuOpen ? "active" : ""}`}
-              onClick={() => {
-                setIsUserMenuOpen((prev) => !prev);
-                setIsNotificationOpen(false);
-              }}
-            >
-              <div className="user-avatar">
-                {userInitial}
-                <span className="online-dot" />
-              </div>
-              <ChevronDown size={14} className="user-arrow" />
-            </button>
-
-            <PopoverContent className="user-menu-popover-content">
-              <div className="user-info-section">
-                <div className="user-avatar-large">
-                  {userInitial}
-                  <span className="avatar-online-dot" />
-                </div>
-                <div className="user-meta">
-                  <div className="user-name">{userName}</div>
-                  <div className="user-email">{userEmail}</div>
-                  <Tag type="blue" size="sm" className="role-tag">
-                    {userRole}
-                  </Tag>
-                </div>
-              </div>
-
-              <div className="user-menu-divider" />
-
-              <div className="user-quick-links">
-                <button
-                  type="button"
-                  className="menu-link-btn"
-                  onClick={() => {
-                    setIsUserMenuOpen(false);
-                    navigate("/profile");
-                  }}
-                >
-                  <User size={16} /> My Profile & Preferences
-                </button>
-                <button
-                  type="button"
-                  className="menu-link-btn"
-                  onClick={() => {
-                    setIsUserMenuOpen(false);
-                    navigate("/settings");
-                  }}
-                >
-                  <Settings size={16} /> Workspace Settings
-                </button>
-              </div>
-
-              <div className="user-menu-divider" />
-
-              <div className="user-menu-actions">
-                <Button
-                  kind="danger--ghost"
-                  size="sm"
-                  renderIcon={Logout}
-                  onClick={handleLogout}
-                  className="user-logout-btn"
-                >
-                  Sign Out
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      </div>
-    </header>
+      {/* User menu */}
+      <Popover
+        open={!!userAnchor}
+        anchorEl={userAnchor}
+        onClose={() => setUserAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+        transformOrigin={{ vertical: "top", horizontal: "right" }}
+        slotProps={{ paper: { sx: { width: 300, maxWidth: "calc(100vw - 32px)", mt: 1 } } }}
+      >
+        <Box sx={{ p: 2, display: "flex", gap: 1.5, alignItems: "center" }}>
+          <Avatar sx={{ width: 48, height: 48, bgcolor: brand.primary }}>{userInitial}</Avatar>
+          <Box sx={{ minWidth: 0 }}>
+            <Typography noWrap sx={{ fontWeight: 700 }}>{userName}</Typography>
+            <Typography noWrap sx={{ color: "text.secondary", fontSize: "0.8125rem" }}>{userEmail}</Typography>
+            <Chip size="small" color="primary" label={userRole} sx={{ mt: 0.5 }} />
+          </Box>
+        </Box>
+        <Divider />
+        <Box sx={{ p: 1, display: "grid" }}>
+          <Button color="inherit" startIcon={<LockOutlined fontSize="small" />} sx={{ justifyContent: "flex-start" }} onClick={() => go("/change-password")}>
+            Change password
+          </Button>
+          <Button color="inherit" startIcon={<SettingsOutlined fontSize="small" />} sx={{ justifyContent: "flex-start" }} onClick={() => go("/settings")}>
+            Workspace settings
+          </Button>
+        </Box>
+        <Divider />
+        <Box sx={{ p: 1 }}>
+          <Button fullWidth color="error" startIcon={<LogoutOutlined fontSize="small" />} onClick={() => go("/logout")}>
+            Sign out
+          </Button>
+        </Box>
+      </Popover>
+    </Box>
   );
 };
