@@ -1,24 +1,20 @@
 import { useState } from "react";
-import { Link, useLocation } from "react-router";
+import { Link as RouterLink, useLocation } from "react-router";
 import { Controller, useForm } from "react-hook-form";
-import {
-  TextInput,
-  Button,
-  InlineNotification,
-  InlineLoading,
-  Heading,
-  Stack,
-} from "@carbon/react";
-import { ArrowLeft, Login, Enterprise, Send, Renew } from "@carbon/icons-react";
+import { Button, CircularProgress, Link, Stack } from "@mui/material";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import Send from "@mui/icons-material/Send";
+import Refresh from "@mui/icons-material/Refresh";
+import { TextInput, InlineNotification } from "../../../components/ui/fields";
 import { REGEX_EMAIL } from "../../../lib/validation-regex";
+import { useTheme } from "@mui/material/styles";
 import { useForgotPassword } from "./forgot-password-api";
-import "./forgot-password.scss";
+import { AuthShell } from "../AuthShell";
 
-const defaultInput = {
-  email: "het@gmail.com",
-};
+const defaultInput = { email: "" };
 
 export function ForgotPassword({ defaultValues = defaultInput }) {
+  const brand = useTheme().palette.brand;
   const location = useLocation();
   const [isSent, setIsSent] = useState(false);
 
@@ -26,12 +22,7 @@ export function ForgotPassword({ defaultValues = defaultInput }) {
     defaultValues = { ...defaultValues, ...location.state.formdata };
   }
 
-  const {
-    control,
-    handleSubmit,
-    setError,
-    watch,
-  } = useForm({ defaultValues });
+  const { control, handleSubmit, setError, watch, formState: { errors } } = useForm({ defaultValues });
 
   const forgotSubmit = useForgotPassword();
   const isLoading = forgotSubmit.isPending;
@@ -53,87 +44,45 @@ export function ForgotPassword({ defaultValues = defaultInput }) {
   };
 
   return (
-    <div className="simple-auth-page">
-      <div className="simple-forgot-container animate-fade-in">
-        <div className="simple-auth-header">
-          <div className="brand-badge">
-            <Enterprise size={24} />
-          </div>
-          <Heading className="brand-title">Forgot Password</Heading>
-          <p className="brand-tagline">Enter your work email to reset</p>
-        </div>
-
-        {isSent ? (
-          <div className="reset-feedback-block">
-            <InlineNotification
-              kind="success"
-              title="Reset link sent"
-              subtitle={`Check ${watch("email")} for instructions.`}
-              hideCloseButton
+    <AuthShell title="Forgot password" tagline="Enter your work email to reset">
+      {isSent ? (
+        <Stack spacing={2}>
+          <InlineNotification kind="success" title="Reset link sent" subtitle={`Check ${watch("email")} for instructions.`} />
+          <Button variant="text" startIcon={<Refresh />} onClick={handleSubmit(submit)} disabled={isLoading}>
+            Resend link
+          </Button>
+          <Button component={RouterLink} to="/login" variant="contained" size="large" sx={{ bgcolor: brand.ink }}>
+            Back to sign in
+          </Button>
+        </Stack>
+      ) : (
+        <form noValidate onSubmit={handleSubmit(submit)}>
+          <Stack spacing={2.5}>
+            <Controller
+              name="email"
+              control={control}
+              rules={{ required: "Email is required", pattern: { value: REGEX_EMAIL, message: "Enter a valid email" } }}
+              render={({ field, fieldState: { error } }) => (
+                <TextInput id="forgot-email" labelText="Email address" type="email" invalid={!!error} invalidText={error?.message} {...field} />
+              )}
             />
+            {errors?.root?.serverError && <InlineNotification kind="error" title="Failed" subtitle={errors.root.serverError.message} />}
             <Button
-              kind="ghost"
-              size="md"
-              renderIcon={Renew}
-              onClick={handleSubmit(submit)}
+              type="submit"
+              size="large"
+              variant="contained"
               disabled={isLoading}
-              style={{ width: "100%", marginTop: "0.5rem" }}
+              endIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <Send />}
+              sx={{ bgcolor: brand.ink, "&:hover": { bgcolor: brand.primary } }}
             >
-              Resend Link
+              {isLoading ? "Sending…" : "Send reset link"}
             </Button>
-            <Link to="/login" style={{ display: "block", marginTop: "1rem" }}>
-              <Button kind="primary" renderIcon={Login} size="lg" style={{ width: "100%" }}>
-                Back to Sign In
-              </Button>
+            <Link component={RouterLink} to="/login" underline="hover" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5, justifyContent: "center", fontWeight: 600 }}>
+              <ArrowBack fontSize="small" /> Back to sign in
             </Link>
-          </div>
-        ) : (
-          <form noValidate onSubmit={handleSubmit(submit)} className="simple-forgot-form">
-            <Stack gap={4}>
-              <Controller
-                name="email"
-                control={control}
-                rules={{
-                  required: "Email is required",
-                  pattern: { value: REGEX_EMAIL, message: "Enter a valid email" },
-                }}
-                render={({ field, fieldState: { error } }) => (
-                  <TextInput
-                    id="forgot-email"
-                    labelText="Email Address"
-                    placeholder="het@gmail.com"
-                    type="email"
-                    required
-                    invalid={!!error}
-                    invalidText={error?.message}
-                    {...field}
-                  />
-                )}
-              />
-
-              <Button
-                type="submit"
-                size="lg"
-                className="submit-btn"
-                disabled={isLoading}
-                renderIcon={isLoading ? null : Send}
-              >
-                {isLoading ? (
-                  <InlineLoading status="active" description="Sending..." />
-                ) : (
-                  "Send Reset Link"
-                )}
-              </Button>
-
-              <div className="back-link-row">
-                <Link to="/login" className="back-link">
-                  <ArrowLeft size={16} /> Back to Sign In
-                </Link>
-              </div>
-            </Stack>
-          </form>
-        )}
-      </div>
-    </div>
+          </Stack>
+        </form>
+      )}
+    </AuthShell>
   );
 }

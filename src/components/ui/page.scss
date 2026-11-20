@@ -1,0 +1,87 @@
+/* Layout helpers shared by the data pages (colours come from the MUI theme). */
+.hr-page {
+  .hr-toolbar {
+    display: flex;
+    gap: 0.75rem;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 16px;
+    padding: 0.875rem 1rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+
+    > * {
+      min-width: 12rem;
+      flex: 0 1 16rem;
+    }
+
+    > .MuiTextField-root:first-child {
+      flex: 2 1 18rem;
+    }
+
+    @media (max-width: 640px) {
+      > * {
+        flex: 1 1 100%;
+        min-width: 0;
+      }
+    }
+  }
+
+  .hr-card {
+    background: #fff;
+    border: 1px solid rgba(0, 0, 0, 0.06);
+    border-radius: 18px;
+    padding: 1.25rem 1.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04), 0 10px 30px rgba(0, 0, 0, 0.04);
+  }
+
+  .hr-grid-2 {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: 1rem;
+  }
+
+  .hr-stat {
+    .label {
+      font-size: 0.75rem;
+      color: #4d6683;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+
+    .value {
+      font-family: "Plus Jakarta Sans Variable", sans-serif;
+      font-size: 1.75rem;
+      font-weight: 700;
+    }
+  }
+
+  .hr-row-actions {
+    display: flex;
+    gap: 0.25rem;
+    flex-wrap: wrap;
+  }
+
+  .hr-empty {
+    padding: 2rem;
+    text-align: center;
+    color: #4d6683;
+  }
+}
+
+.hr-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+  padding-top: 0.5rem;
+
+  .full {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: 1fr;
+  }
+}

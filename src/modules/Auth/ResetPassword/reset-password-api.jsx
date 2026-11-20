@@ -2,6 +2,7 @@ import axios from "axios";
 import { useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../../../config/env";
 
 export function useResetPassword(token) {
   const navigate = useNavigate();
@@ -9,7 +10,7 @@ export function useResetPassword(token) {
     mutationFn: (formdata) => {
       return axios
         .create({
-          baseURL: import.meta.env.VITE_SERVER_HOST,
+          baseURL: API_BASE_URL,
           headers: { Authorization: `Bearer ${token}` },
         })
         .post("auth/reset/password", formdata);

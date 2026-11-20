@@ -1,243 +1,108 @@
-import { useState } from "react";
-import {
-  Tile,
-  Grid,
-  Column,
-  Button,
-  Tag,
-  Heading,
-  Section,
-} from "@carbon/react";
-import {
-  UserMultiple,
-  Security,
-  CheckmarkOutline,
-  ArrowUpRight,
-  ArrowRight,
-  Add,
-  Time,
-  Renew,
-} from "@carbon/icons-react";
+import { useRef } from "react";
 import { useNavigate } from "react-router";
+import { Box, Button, Card, CardContent, Skeleton, Stack, Typography } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
+import PeopleOutlined from "@mui/icons-material/PeopleOutlined";
+import ApartmentOutlined from "@mui/icons-material/ApartmentOutlined";
+import EventOutlined from "@mui/icons-material/EventOutlined";
+import EditCalendarOutlined from "@mui/icons-material/EditCalendarOutlined";
+import ArrowForward from "@mui/icons-material/ArrowForward";
 import { useAuthContext } from "../../context/AuthContext/AuthContextExport";
-import "./dashboard.scss";
+import { useEmployees } from "../../api/employees-api";
+import { useDepartments } from "../../api/departments-api";
+import { useLeaveApplications } from "../../api/leave-api";
+import { useMispunchRequests } from "../../api/mispunch-api";
+import { useReveal } from "../../components/motion/useReveal";
+import { CountUp } from "../../components/motion/CountUp";
 
+const ONE = { page: 1, pageSize: 1 };
+
+const greeting = () => {
+  const h = new Date().getHours();
+  return h < 12 ? "Good morning" : h < 18 ? "Good afternoon" : "Good evening";
+};
+
+/** Live counts from the API; "—" when the account may not see that data. */
 export const Dashboard = () => {
+  const brand = useTheme().palette.brand;
   const navigate = useNavigate();
+  const ref = useRef(null);
   const { getData } = useAuthContext();
-  const user = getData();
-  const userName = user?.userData?.name || "Het";
+  const userName = getData()?.userData?.name || "there";
+  useReveal(ref, ".dash-item", { y: 22, stagger: 0.08 });
 
-  const [refreshing, setRefreshing] = useState(false);
+  const employees = useEmployees({ ...ONE, status: "active" });
+  const departments = useDepartments();
+  const leave = useLeaveApplications({ ...ONE, status: "pending" });
+  const mispunch = useMispunchRequests({ ...ONE, status: "pending" });
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 500);
-  };
-
-  const metricCards = [
-    {
-      title: "Total Employees",
-      value: "1,248",
-      change: "+12% this month",
-      trend: "up",
-      icon: UserMultiple,
-      colorClass: "metric-blue",
-    },
-    {
-      title: "On Leave Today",
-      value: "18",
-      change: "1.4% workforce",
-      trend: "neutral",
-      icon: Time,
-      colorClass: "metric-purple",
-    },
-    {
-      title: "Attendance Rate",
-      value: "98.2%",
-      change: "+0.8% this week",
-      trend: "up",
-      icon: CheckmarkOutline,
-      colorClass: "metric-green",
-    },
-    {
-      title: "Active Roles",
-      value: "4",
-      change: "7 modules governed",
-      trend: "neutral",
-      icon: Security,
-      colorClass: "metric-teal",
-    },
-  ];
-
-  const recentActivities = [
-    {
-      id: "1",
-      title: "Updated permissions for Attendance module",
-      actor: "Het Gajjar (Admin)",
-      time: "10m ago",
-      tag: "Security",
-      tagType: "purple",
-    },
-    {
-      id: "2",
-      title: "New role 'HR Specialist' configured",
-      actor: "Sarah Jenkins",
-      time: "45m ago",
-      tag: "Roles",
-      tagType: "blue",
-    },
-    {
-      id: "3",
-      title: "Payroll computation finalized",
-      actor: "Finance Team",
-      time: "2h ago",
-      tag: "Payroll",
-      tagType: "green",
-    },
+  const tiles = [
+    { title: "Active employees", q: employees, value: employees.data?.totalCount, icon: PeopleOutlined, color: brand.primary, to: "/employees" },
+    { title: "Departments", q: departments, value: departments.data?.length, icon: ApartmentOutlined, color: brand.ink, to: "/departments" },
+    { title: "Pending leave requests", q: leave, value: leave.data?.totalCount, icon: EventOutlined, color: "#2E8B83", to: "/leave" },
+    { title: "Pending punch corrections", q: mispunch, value: mispunch.data?.totalCount, icon: EditCalendarOutlined, color: brand.accent, to: "/mispunch" },
   ];
 
   return (
-    <Section className="dashboard-container animate-fade-in">
-      {/* Sleek Header Bar */}
-      <div className="dashboard-top-bar">
-        <div>
-          <Heading className="dashboard-greeting">Welcome back, {userName}</Heading>
-          <p className="dashboard-sub-greeting">
-            Here is your daily organization and security overview.
-          </p>
-        </div>
-        <div className="dashboard-actions">
-          <Button
-            kind="ghost"
-            size="md"
-            renderIcon={Renew}
-            onClick={handleRefresh}
-            className={`refresh-btn ${refreshing ? "rotating" : ""}`}
-          >
-            Refresh
-          </Button>
-          <Button
-            kind="primary"
-            size="md"
-            renderIcon={Add}
-            onClick={() => navigate("/roles/add")}
-          >
-            Add Role
-          </Button>
-        </div>
-      </div>
+    <Box ref={ref} sx={{ position: "relative", zIndex: 1, maxWidth: 1440, mx: "auto", p: { xs: 2, sm: 3, lg: 4 }, display: "flex", flexDirection: "column", gap: 3 }}>
+      {/* Hero */}
+      <Box
+        className="dash-item"
+        sx={{
+          position: "relative",
+          overflow: "hidden",
+          borderRadius: "28px",
+          p: { xs: 3, md: 4.5 },
+          color: "#fff",
+          background: `linear-gradient(120deg, ${brand.ink} 0%, color-mix(in srgb, ${brand.ink} 55%, ${brand.primary}) 100%)`,
+          boxShadow: `0 20px 50px ${alpha(brand.ink, 0.3)}`,
+        }}
+      >
+        <Box sx={{ position: "absolute", right: -60, top: -80, width: 320, height: 320, borderRadius: "50%", background: alpha(brand.soft, 0.18) }} />
+        <Box sx={{ position: "absolute", right: 90, bottom: -110, width: 220, height: 220, borderRadius: "50%", background: alpha(brand.accent, 0.28) }} />
+        <Box sx={{ position: "relative" }}>
+          <Typography sx={{ opacity: 0.8, fontWeight: 600, letterSpacing: "0.04em", fontSize: "0.8125rem", textTransform: "uppercase" }}>
+            {new Date().toLocaleDateString(undefined, { weekday: "long", day: "numeric", month: "long" })}
+          </Typography>
+          <Typography variant="h4" component="h1" sx={{ mt: 0.5, fontSize: { xs: "1.6rem", md: "2.1rem" } }}>
+            {greeting()}, {userName}
+          </Typography>
+          <Typography sx={{ opacity: 0.85, mt: 0.75 }}>Here is what needs your attention today.</Typography>
+          <Stack direction="row" sx={{ gap: 1.25, flexWrap: "wrap", mt: 2.5 }}>
+            <Button variant="contained" onClick={() => navigate("/leave")} sx={{ bgcolor: "#fff", color: brand.ink, "&:hover": { bgcolor: brand.soft } }}>
+              Review leave requests
+            </Button>
+            <Button variant="outlined" onClick={() => navigate("/attendance")} sx={{ color: "#fff", borderColor: alpha("#fff", 0.5), "&:hover": { borderColor: "#fff", bgcolor: alpha("#fff", 0.1) } }}>
+              Open attendance
+            </Button>
+          </Stack>
+        </Box>
+      </Box>
 
-      {/* KPI Metric Summary Tiles */}
-      <div className="metrics-grid">
-        {metricCards.map((card, idx) => {
-          const IconComp = card.icon;
+      {/* Live counts */}
+      <Box sx={{ display: "grid", gap: 2.5, gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))" }}>
+        {tiles.map((t) => {
+          const Icon = t.icon;
           return (
-            <Tile key={idx} className={`metric-tile ${card.colorClass}`}>
-              <div className="metric-tile-header">
-                <span className="metric-title">{card.title}</span>
-                <div className="metric-icon-wrap">
-                  <IconComp size={18} />
-                </div>
-              </div>
-              <div className="metric-value">{card.value}</div>
-              <div className="metric-change">
-                {card.trend === "up" && <ArrowUpRight size={14} />}
-                <span>{card.change}</span>
-              </div>
-            </Tile>
+            <Card key={t.title} className="dash-item" sx={{ "&:hover": { transform: "translateY(-4px)" } }}>
+              <CardContent sx={{ p: 3 }}>
+                <Stack direction="row" sx={{ justifyContent: "space-between", alignItems: "center" }}>
+                  <Typography sx={{ color: "text.secondary", fontSize: "0.8125rem", fontWeight: 600 }}>{t.title}</Typography>
+                  <Box sx={{ width: 40, height: 40, borderRadius: 2.5, display: "grid", placeItems: "center", color: t.color, bgcolor: alpha(t.color, 0.12) }}>
+                    <Icon fontSize="small" />
+                  </Box>
+                </Stack>
+                <Typography component="div" sx={{ fontFamily: '"Plus Jakarta Sans Variable", sans-serif', fontWeight: 800, fontSize: "2.4rem", lineHeight: 1.1, mt: 1.5, mb: 1 }}>
+                  {t.q.isLoading ? <Skeleton width={70} /> : <CountUp value={t.value} />}
+                </Typography>
+                <Button size="small" endIcon={<ArrowForward fontSize="small" />} onClick={() => navigate(t.to)} sx={{ ml: -1 }}>
+                  View
+                </Button>
+              </CardContent>
+            </Card>
           );
         })}
-      </div>
-
-      {/* 2-Column Split: Activity Stream & Quick Links */}
-      <Grid fullWidth narrow className="dashboard-split-grid">
-        <Column sm={4} md={5} lg={10}>
-          <div className="dashboard-card">
-            <div className="card-header-bar">
-              <Heading className="card-heading">Recent Activities</Heading>
-              <Button
-                kind="ghost"
-                size="sm"
-                renderIcon={ArrowRight}
-                onClick={() => navigate("/audit-logs")}
-              >
-                View all
-              </Button>
-            </div>
-
-            <div className="activity-timeline">
-              {recentActivities.map((act) => (
-                <div key={act.id} className="activity-timeline-item">
-                  <div className="timeline-dot" />
-                  <div className="timeline-body">
-                    <div className="timeline-row">
-                      <span className="activity-title">{act.title}</span>
-                      <Tag size="sm" type={act.tagType}>
-                        {act.tag}
-                      </Tag>
-                    </div>
-                    <div className="timeline-meta">
-                      <span>{act.actor}</span>
-                      <span className="bullet">•</span>
-                      <span>{act.time}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </Column>
-
-        <Column sm={4} md={3} lg={6}>
-          <div className="dashboard-card">
-            <Heading className="card-heading">Quick Actions</Heading>
-            <div className="quick-actions-list">
-              <button
-                type="button"
-                className="quick-action-button"
-                onClick={() => navigate("/roles/list")}
-              >
-                <div className="action-icon-pill blue">
-                  <Security size={16} />
-                </div>
-                <div className="action-label-wrap">
-                  <span className="action-name">Manage Roles</span>
-                </div>
-                <ArrowRight size={14} className="action-chevron" />
-              </button>
-
-              <button
-                type="button"
-                className="quick-action-button"
-                onClick={() => navigate("/permissions/list")}
-              >
-                <div className="action-icon-pill purple">
-                  <CheckmarkOutline size={16} />
-                </div>
-                <div className="action-label-wrap">
-                  <span className="action-name">Permissions Matrix</span>
-                </div>
-                <ArrowRight size={14} className="action-chevron" />
-              </button>
-
-              <button
-                type="button"
-                className="quick-action-button"
-                onClick={() => navigate("/roles/add")}
-              >
-                <div className="action-icon-pill green">
-                  <Add size={16} />
-                </div>
-                <div className="action-label-wrap">
-                  <span className="action-name">Create New Role</span>
-                </div>
-                <ArrowRight size={14} className="action-chevron" />
-              </button>
-            </div>
-          </div>
-        </Column>
-      </Grid>
-    </Section>
+      </Box>
+    </Box>
   );
 };

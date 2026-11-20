@@ -1,20 +1,20 @@
 import { QueryProvider } from "./QueryProvider";
 import { ToastProvider } from "./ToastProvider";
-import { Theme } from "@carbon/react";
+import { LocalizationProvider } from "@mui/x-date-pickers";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { AppearanceProvider } from "../theme/AppearanceProvider";
 import { AuthProvider } from "./AuthContext/AuthProvider";
 
 export function Context({ children }) {
   return (
     <QueryProvider>
-      <ToastProvider>
-        <AuthProvider>
-          <Theme theme="white">
-            {children}
-          </Theme>
-        </AuthProvider>
-      </ToastProvider>
+      <AppearanceProvider>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <ToastProvider>
+            <AuthProvider>{children}</AuthProvider>
+          </ToastProvider>
+        </LocalizationProvider>
+      </AppearanceProvider>
     </QueryProvider>
   );
 }
-
-

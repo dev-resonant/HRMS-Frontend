@@ -1,39 +1,27 @@
 import { useForm, Controller } from "react-hook-form";
-import { useSearchParams, useNavigate, Link } from "react-router";
-import {
-  PasswordInput,
-  Button,
-  InlineNotification,
-  InlineLoading,
-  Heading,
-  Stack,
-} from "@carbon/react";
-import { ArrowRight, Enterprise, Checkmark, Subtract } from "@carbon/icons-react";
+import { useSearchParams, useNavigate, Link as RouterLink } from "react-router";
+import { Box, Button, CircularProgress, Link, Stack, Typography } from "@mui/material";
+import ArrowForward from "@mui/icons-material/ArrowForward";
+import Check from "@mui/icons-material/Check";
+import Remove from "@mui/icons-material/Remove";
+import { PasswordInput, InlineNotification } from "../../../components/ui/fields";
+import { useTheme } from "@mui/material/styles";
 import { useResetPassword } from "./reset-password-api";
-import "./reset-password.scss";
+import { AuthShell } from "../AuthShell";
 
-const defaultInput = {
-  password: "",
-  confirm_password: "",
-};
+const defaultInput = { password: "", confirm_password: "" };
 
 export function ResetPassword() {
+  const brand = useTheme().palette.brand;
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const token = searchParams.get("token");
   const reset = useResetPassword(token);
   const isLoading = reset.isPending;
 
-  const {
-    handleSubmit,
-    control,
-    watch,
-    setError,
-    formState: { errors },
-  } = useForm({ defaultValues: defaultInput });
+  const { handleSubmit, control, watch, getValues, setError, formState: { errors } } = useForm({ defaultValues: defaultInput });
 
   const passwordVal = watch("password") || "";
-
   const rules = [
     { label: "At least 8 characters", valid: passwordVal.length >= 8 },
     { label: "At least one number or special char", valid: /[\d!@#$%^&*()]/.test(passwordVal) },
@@ -46,9 +34,7 @@ export function ResetPassword() {
     }
     form_data.append("token", token);
     reset.mutate(form_data, {
-      onSuccess: () => {
-        navigate("/login");
-      },
+      onSuccess: () => navigate("/login"),
       onError: (axiosError) => {
         setError("root.serverError", {
           message: axiosError.response?.data?.message || "Password reset failed.",
@@ -59,104 +45,57 @@ export function ResetPassword() {
   };
 
   return (
-    <div className="simple-auth-page">
-      <div className="simple-reset-container animate-fade-in">
-        <div className="simple-auth-header">
-          <div className="brand-badge">
-            <Enterprise size={24} />
-          </div>
-          <Heading className="brand-title">New Password</Heading>
-          <p className="brand-tagline">Set your new password</p>
-        </div>
-
-        <form noValidate onSubmit={handleSubmit(submit)} className="simple-reset-form">
-          <Stack gap={4}>
-            <Controller
-              name="password"
-              control={control}
-              rules={{
-                required: "Password is required",
-                minLength: { value: 8, message: "Must be at least 8 characters" },
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <PasswordInput
-                  id="reset-password"
-                  labelText="New Password"
-                  placeholder="Enter new password"
-                  required
-                  invalid={!!error}
-                  invalidText={error?.message}
-                  {...field}
-                />
-              )}
-            />
-
-            {/* Simple Dynamic Requirements */}
-            <div className="simple-checklist">
-              {rules.map((r, idx) => (
-                <div key={idx} className={`checklist-item ${r.valid ? "passed" : ""}`}>
-                  {r.valid ? (
-                    <Checkmark size={12} className="check-icon success" />
-                  ) : (
-                    <Subtract size={12} className="check-icon neutral" />
-                  )}
-                  <span>{r.label}</span>
-                </div>
-              ))}
-            </div>
-
-            <Controller
-              name="confirm_password"
-              control={control}
-              rules={{
-                required: "Please confirm your password",
-                validate: (value) =>
-                  value === watch("password") || "Passwords do not match",
-              }}
-              render={({ field, fieldState: { error } }) => (
-                <PasswordInput
-                  id="reset-confirm-password"
-                  labelText="Confirm Password"
-                  placeholder="Repeat new password"
-                  required
-                  invalid={!!error}
-                  invalidText={error?.message}
-                  {...field}
-                />
-              )}
-            />
-
-            {errors?.root?.serverError && (
-              <InlineNotification
-                kind="error"
-                title="Failed"
-                subtitle={errors.root.serverError.message}
-                hideCloseButton
-              />
+    <AuthShell title="New password" tagline="Set your new password">
+      <form noValidate onSubmit={handleSubmit(submit)}>
+        <Stack spacing={2}>
+          <Controller
+            name="password"
+            control={control}
+            rules={{ required: "Password is required", minLength: { value: 8, message: "Must be at least 8 characters" } }}
+            render={({ field, fieldState: { error } }) => (
+              <PasswordInput id="reset-password" labelText="New password" autoComplete="new-password" invalid={!!error} invalidText={error?.message} {...field} />
             )}
+          />
 
-            <Button
-              type="submit"
-              size="lg"
-              className="submit-btn"
-              disabled={isLoading}
-              renderIcon={isLoading ? null : ArrowRight}
-            >
-              {isLoading ? (
-                <InlineLoading status="active" description="Saving..." />
-              ) : (
-                "Update Password"
-              )}
-            </Button>
+          <Box>
+            {rules.map((r) => (
+              <Box key={r.label} sx={{ display: "flex", alignItems: "center", gap: 0.75, fontSize: "0.8125rem", color: r.valid ? "success.main" : "text.secondary" }}>
+                {r.valid ? <Check sx={{ fontSize: 16 }} /> : <Remove sx={{ fontSize: 16 }} />}
+                <Typography sx={{ fontSize: "inherit" }}>{r.label}</Typography>
+              </Box>
+            ))}
+          </Box>
 
-            <div className="back-link-row">
-              <Link to="/login" className="back-link">
-                Back to Sign In
-              </Link>
-            </div>
-          </Stack>
-        </form>
-      </div>
-    </div>
+          <Controller
+            name="confirm_password"
+            control={control}
+            rules={{
+              required: "Please confirm your password",
+              validate: (value) => value === getValues("password") || "Passwords do not match",
+            }}
+            render={({ field, fieldState: { error } }) => (
+              <PasswordInput id="reset-confirm-password" labelText="Confirm password" autoComplete="new-password" invalid={!!error} invalidText={error?.message} {...field} />
+            )}
+          />
+
+          {errors?.root?.serverError && <InlineNotification kind="error" title="Failed" subtitle={errors.root.serverError.message} />}
+
+          <Button
+            type="submit"
+            size="large"
+            variant="contained"
+            disabled={isLoading}
+            endIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <ArrowForward />}
+            sx={{ bgcolor: brand.ink, "&:hover": { bgcolor: brand.primary } }}
+          >
+            {isLoading ? "Saving…" : "Update password"}
+          </Button>
+
+          <Link component={RouterLink} to="/login" underline="hover" align="center" sx={{ textAlign: "center", fontWeight: 600 }}>
+            Back to sign in
+          </Link>
+        </Stack>
+      </form>
+    </AuthShell>
   );
 }
